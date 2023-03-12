@@ -1,0 +1,45 @@
+# free-wenesday-free
+-- Community-free-Version of WenesdayOS: 1.2.3 
+
+wenesday - Kore-Technologie Lizenzvereinbarung Version 1.2.3 - Stand: Januar 2023
+
+# wenesday
+>> TENSORFLOW INI
+>> USE OPENAI
+>> USE QUANTUM
+>> REBULD GPT-616-Quantinium
+
+This repository contains code and files for the "Wensday" project. Wensday is a web application that allows users to create and share their favorite recipes, as well as browse recipes from other users.
+
+Provider: IT.lopez-be.ch >> lopez.codes >> lopez.zone >> lopez.one
+
+Getting Started:
+
+To use the Wensday web application, simply navigate to the following URL: https://blopen/free-wenesday-free. This will take you to the main page of the application, where you can start browsing and creating recipes.
+
+If you would like to contribute to the Wensday project, you can do so by cloning the repository to your local machine. To do this, you will need to have Git installed on your computer. Once you have Git installed, you can clone the repository by running the following command in your terminal:
+
+>> git clone https://github.com/it-lopez-be-ch/wensday.git
+
+After you have cloned the repository, you can make changes to the code and files as needed. When you are ready to commit your changes, be sure to create a new branch and commit your changes to that branch. Once you have committed your changes, you can submit a pull request to the main branch for review.
+
+Dependencies:
+
+The Wensday web application is built using the following dependencies:
+
+React
+React-Router
+Redux
+Material-UI
+Firebase
+License:
+
+The Wensday project is licensed under the MIT License. See the LICENSE file for more details.
+
+Contributors:
+
+The following people have contributed to the development of the Wensday project:
+
+@wenesday@W (@it-lopez-be-ch)
+Nelson Vincent Lopez (@nelson)
+If you would like to contribute to the project, please submit a pull request with your changes. We welcome all contributions!

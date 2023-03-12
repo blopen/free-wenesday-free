@@ -1,0 +1,230 @@
+<<<<<<< HEAD
+
+
+
+
+import numpy as np
+import scipy.optimize as optimize
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, execute, BasicAer
+
+# Initialize the quantum and classical registers
+qreg_q = QuantumRegister(4, 'q')
+creg_c = ClassicalRegister(4, 'c')
+circuit = QuantumCircuit(qreg_q, creg_c)
+circuit.barrier(qreg_q)
+
+# Use the VQE optimizer to find the state with lowest energy
+backend = BasicAer.get_backend('qasm_simulator')
+params_initial = np.array([0.1, 0.1, 0.1])
+param = np.array([0.0, 0.0, 0.0])
+
+# @phaseDisk(qreg_q[0], qreg_q[1], qreg_q[2], qreg_q[3])
+circuit.x(qreg_q[0])
+circuit.x(qreg_q[3])
+circuit.x(qreg_q[2])
+circuit.x(qreg_q[1])
+circuit.x(qreg_q[0])
+circuit.x(qreg_q[3])
+circuit.s(qreg_q[1])
+circuit.z(qreg_q[2])
+circuit.h(qreg_q[3])
+circuit.rz(pi / 2, qreg_q[0])
+circuit.h(qreg_q[2])
+circuit.h(qreg_q[1])
+circuit.measure(qreg_q[0], creg_c[0])
+circuit.measure(qreg_q[1], creg_c[1])
+circuit.swap(qreg_q[2], qreg_q[3])
+circuit.h(qreg_q[0])
+circuit.p(pi / 2, qreg_q[1])
+circuit.h(qreg_q[3])
+circuit.h(qreg_q[1])
+circuit.h(qreg_q[0])
+circuit.p(pi / 2, qreg_q[2])
+circuit.ccx(qreg_q[0], qreg_q[1], qreg_q[2])
+circuit.h(qreg_q[3])
+circuit.p(pi / 2, qreg_q[1])
+circuit.h(qreg_q[0])
+circuit.p(pi / 2, qreg_q[2])
+circuit.p(pi / 2, qreg_q[3])
+circuit.ccx(qreg_q[1], qreg_q[2], qreg_q[3])
+circuit.h(qreg_q[0])
+circuit.p(pi / 2, qreg_q[2])
+circuit.swap(qreg_q[0], qreg_q[1])
+circuit.p(pi / 2, qreg_q[3])
+circuit.p(pi / 2, qreg_q[1])
+circuit.h(qreg_q[2])
+circuit.h(qreg_q[3])
+circuit.h(qreg_q[0])
+circuit.z(qreg_q[0])
+circuit.ccx(qreg_q[1], qreg_q[2], qreg_q[3])
+circuit.p(pi / 2, qreg_q[0])
+circuit.p(pi / 2, qreg_q[2])
+circuit.p(pi / 2, qreg_q[1])
+circuit.p(pi / 2, qreg_q[3])
+circuit.measure(qreg_q[0], creg_c[0])
+circuit.measure(qreg_q[1], creg_c[1])
+circuit.swap(qreg_q[0], qreg_q[1])
+circuit.h(qreg_q[3])
+circuit.h(qreg_q[2])
+circuit.swap(qreg_q[2], qreg_q[3])
+circuit.p(pi / 2, qreg_q[0])
+circuit.p(pi / 2, qreg_q[1])
+circuit.p(pi / 2, qreg_q[2])
+circuit.h(qreg_q[3])
+circuit.h(qreg_q[0])
+circuit.h(qreg_q[1])
+circuit.sx(qreg_q[3])
+circuit.swap(qreg_q[0], qreg_q[1])
+circuit.x(qreg_q[0])
+circuit.ccx(qreg_q[1], qreg_q[2], qreg_q[3])
+
+def hamiltonian(params):
+    
+    H = np.array([[params[0], params[1]],
+                  [params[1], params[2]]])
+    return H
+
+def params_optimized(params_initial, circuit, qreg_q, creg_c, backend, shots, hamiltonian, method='SLSQP', options={'disp': True, 'maxiter': 1000}, tol=1e-6):
+    result = optimize.minimize(energy_objective, params_initial, args=(circuit, qreg_q, creg_c, backend, shots, hamiltonian), method=method, options=options, tol=1e-6)
+    return result
+
+def ansatz(params, circuit, qreg_q):
+    # Implement the ansatz quantum algorithm with the given parameters
+    circuit.ry(params[0], qreg_q[0])
+    circuit.cx(qreg_q[0], qreg_q[1])
+    circuit.ry(params[1], qreg_q[1])
+    circuit.cx(qreg_q[0], qreg_q[1])
+    circuit.ry(params[2], qreg_q[0])
+
+def energy_objective(params, circuit, qreg_q, backend, shots, hamiltonian):
+    # Execute the quantum circuit and calculate the energy
+    ansatz(params, circuit, qreg_q)
+    circuit.measure(qreg_q, creg_c)
+    job = execute(circuit, backend, shots=shots)  # Execute the circuit
+    result = job.result()  # Get the result
+    energy = hamiltonian.calculate_energy(result)
+    return energy
+
+params_optimized = params_optimized(params_initial, circuit, qreg_q, creg_c, backend, 1000, hamiltonian)
+ansatz(params_optimized, circuit, qreg_q)
+circuit.measure(qreg_q, creg_c)
+job = execute(circuit, backend, shots=1000)
+result = job.result()
+counts = result.get_counts(circuit)
+print(counts)
+=======
+
+
+
+
+import numpy as np
+import scipy.optimize as optimize
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, execute, BasicAer
+
+# Initialize the quantum and classical registers
+qreg_q = QuantumRegister(4, 'q')
+creg_c = ClassicalRegister(4, 'c')
+circuit = QuantumCircuit(qreg_q, creg_c)
+circuit.barrier(qreg_q)
+
+# Use the VQE optimizer to find the state with lowest energy
+backend = BasicAer.get_backend('qasm_simulator')
+params_initial = np.array([0.1, 0.1, 0.1])
+param = np.array([0.0, 0.0, 0.0])
+
+# @phaseDisk(qreg_q[0], qreg_q[1], qreg_q[2], qreg_q[3])
+circuit.x(qreg_q[0])
+circuit.x(qreg_q[3])
+circuit.x(qreg_q[2])
+circuit.x(qreg_q[1])
+circuit.x(qreg_q[0])
+circuit.x(qreg_q[3])
+circuit.s(qreg_q[1])
+circuit.z(qreg_q[2])
+circuit.h(qreg_q[3])
+circuit.rz(pi / 2, qreg_q[0])
+circuit.h(qreg_q[2])
+circuit.h(qreg_q[1])
+circuit.measure(qreg_q[0], creg_c[0])
+circuit.measure(qreg_q[1], creg_c[1])
+circuit.swap(qreg_q[2], qreg_q[3])
+circuit.h(qreg_q[0])
+circuit.p(pi / 2, qreg_q[1])
+circuit.h(qreg_q[3])
+circuit.h(qreg_q[1])
+circuit.h(qreg_q[0])
+circuit.p(pi / 2, qreg_q[2])
+circuit.ccx(qreg_q[0], qreg_q[1], qreg_q[2])
+circuit.h(qreg_q[3])
+circuit.p(pi / 2, qreg_q[1])
+circuit.h(qreg_q[0])
+circuit.p(pi / 2, qreg_q[2])
+circuit.p(pi / 2, qreg_q[3])
+circuit.ccx(qreg_q[1], qreg_q[2], qreg_q[3])
+circuit.h(qreg_q[0])
+circuit.p(pi / 2, qreg_q[2])
+circuit.swap(qreg_q[0], qreg_q[1])
+circuit.p(pi / 2, qreg_q[3])
+circuit.p(pi / 2, qreg_q[1])
+circuit.h(qreg_q[2])
+circuit.h(qreg_q[3])
+circuit.h(qreg_q[0])
+circuit.z(qreg_q[0])
+circuit.ccx(qreg_q[1], qreg_q[2], qreg_q[3])
+circuit.p(pi / 2, qreg_q[0])
+circuit.p(pi / 2, qreg_q[2])
+circuit.p(pi / 2, qreg_q[1])
+circuit.p(pi / 2, qreg_q[3])
+circuit.measure(qreg_q[0], creg_c[0])
+circuit.measure(qreg_q[1], creg_c[1])
+circuit.swap(qreg_q[0], qreg_q[1])
+circuit.h(qreg_q[3])
+circuit.h(qreg_q[2])
+circuit.swap(qreg_q[2], qreg_q[3])
+circuit.p(pi / 2, qreg_q[0])
+circuit.p(pi / 2, qreg_q[1])
+circuit.p(pi / 2, qreg_q[2])
+circuit.h(qreg_q[3])
+circuit.h(qreg_q[0])
+circuit.h(qreg_q[1])
+circuit.sx(qreg_q[3])
+circuit.swap(qreg_q[0], qreg_q[1])
+circuit.x(qreg_q[0])
+circuit.ccx(qreg_q[1], qreg_q[2], qreg_q[3])
+
+def hamiltonian(params):
+    
+    H = np.array([[params[0], params[1]],
+                  [params[1], params[2]]])
+    return H
+
+def params_optimized(params_initial, circuit, qreg_q, creg_c, backend, shots, hamiltonian, method='SLSQP', options={'disp': True, 'maxiter': 1000}, tol=1e-6):
+    result = optimize.minimize(energy_objective, params_initial, args=(circuit, qreg_q, creg_c, backend, shots, hamiltonian), method=method, options=options, tol=1e-6)
+    return result
+
+def ansatz(params, circuit, qreg_q):
+    # Implement the ansatz quantum algorithm with the given parameters
+    circuit.ry(params[0], qreg_q[0])
+    circuit.cx(qreg_q[0], qreg_q[1])
+    circuit.ry(params[1], qreg_q[1])
+    circuit.cx(qreg_q[0], qreg_q[1])
+    circuit.ry(params[2], qreg_q[0])
+
+def energy_objective(params, circuit, qreg_q, backend, shots, hamiltonian):
+    # Execute the quantum circuit and calculate the energy
+    ansatz(params, circuit, qreg_q)
+    circuit.measure(qreg_q, creg_c)
+    job = execute(circuit, backend, shots=shots)  # Execute the circuit
+    result = job.result()  # Get the result
+    energy = hamiltonian.calculate_energy(result)
+    return energy
+
+params_optimized = params_optimized(params_initial, circuit, qreg_q, creg_c, backend, 1000, hamiltonian)
+ansatz(params_optimized, circuit, qreg_q)
+circuit.measure(qreg_q, creg_c)
+job = execute(circuit, backend, shots=1000)
+result = job.result()
+counts = result.get_counts(circuit)
+print(counts)
+>>>>>>> bb5139a261576f42443de9c7549cfb80c1f47869
+circuit.draw(output='mpl')
