@@ -1,46 +1,47 @@
-wensday - Kore-Technologie Lizenzvereinbarung Version 1.0.1 - Stand: Januar 2023
+# free-wenesday-free
+-- Community-free-Version of WenesdayOS: 1.2.3 
 
-BEACHTEN SIE DIESES WICHTIGE DOKUMENT SORGFÄLTIG, BEVOR SIE IRGENDWELCHE TEILE DER KORE-TECHNOLOGIE VERWENDEN, KOPIEREN, INSTALLIEREN ODER ÄNDERN.
+wenesday - Kore-Technologie Lizenzvereinbarung Version 1.2.3 - Stand: Januar 2023
 
-DEFINITIONEN:
+# wenesday
+>> TENSORFLOW INI
+>> USE OPENAI
+>> USE QUANTUM
+>> REBULD GPT-616-Quantinium
 
-Für diese Lizenzvereinbarung gelten folgende Definitionen:
+This repository contains code and files for the "Wenesday" project. Wenesday is a web application that allows users to create and share their favorite recipes, as well as browse recipes from other users.
 
-"Kore-Technologie" bezeichnet die Software, alle ihre Bestandteile und dazugehörige Dokumentation.
+Provider: IT.lopez-be.ch >> lopez.codes >> lopez.zone >> lopez.one
 
-"Lizenzgeber" bezeichnet it.lopez-be.ch oder [Nelson Vincent Lopez], die die Kore-Technologie zur Verfügung stellen.
+Getting Started:
 
-"Lizenznehmer" bezeichnet die Person oder das Unternehmen, das die Kore-Technologie verwendet, kopiert, installiert oder ändert.
+To use the Wenesday web application, simply navigate to the following URL: https://blopen/free-wenesday-free. This will take you to the main page of the application, where you can start browsing and creating recipes.
 
-LIZENZGEWÄHRUNG:
+If you would like to contribute to the Wenesday project, you can do so by cloning the repository to your local machine. To do this, you will need to have Git installed on your computer. Once you have Git installed, you can clone the repository by running the following command in your terminal:
 
-Die Lizenzgeber gewähren dem Lizenznehmer eine nicht ausschließliche, nicht übertragbare Lizenz zur Verwendung der Kore-Technologie ausschließlich zu den folgenden Bedingungen:
+>> git clone https://blopen/free-wenesday-free.git
 
-Die Kore-Technologie ist ausschließlich für den internen Gebrauch des Lizenznehmers bestimmt und darf nicht an Dritte weitergegeben oder verkauft werden.
+After you have cloned the repository, you can make changes to the code and files as needed. When you are ready to commit your changes, be sure to create a new branch and commit your changes to that branch. Once you have committed your changes, you can submit a pull request to the main branch for review.
 
-Jede Nutzung, Vervielfältigung, Modifikation oder Verbreitung der Kore-Technologie durch den Lizennehmer muss deutlich mit dem Copyright-Vermerk des Lizenzgebers gekennzeichnet werden.
+Dependencies:
 
-Der Lizenznehmer darf die Kore-Technologie nicht nutzen, um schädliche oder rechtswidrige Aktivitäten durchzuführen.
+The Wenesday web application is built using the following dependencies:
 
-URHEBERRECHTSVERMERK:
+React
+React-Router
+Redux
+Material-UI
+Firebase
+License:
 
-Die Kore-Technologie, einschließlich aller zugehörigen Materialien, ist urheberrechtlich geschützt und Eigentum des Lizenzgebers. Alle Rechte, die in dieser Vereinbarung nicht ausdrücklich gewährt wurden, bleiben beim Lizenzgeber und dürfen nicht ohne schriftliche Genehmigung des Lizenzgebers genutzt oder übertragen werden.
+The Wenesday project is licensed under the MIT License. See the LICENSE file for more details.
 
-HAFTUNGSBESCHRÄNKUNG:
+Contributors:
 
-DIE LIZENZGEBER HAFTEN UNTER KEINEN UMSTÄNDEN FÜR DIREKTE ODER INDIREKTE SCHÄDEN, DIE DEM LICENZNEMER ODER DRITTEN DURCH DIE VERWENDUNG DER KORE-TECHNOLOGIE ENTSTEHEN.
+The following people have contributed to the development of the Wensday project:
 
-GERICHTSSTAND:
+@wenesday@W (@it-lopez-be-ch)
+Nelson Lopez (@nelson)
+If you would like to contribute to the project, please submit a pull request with your changes. We welcome all contributions!
 
-Diese Lizenzvereinbarung unterliegt den Gesetzen der Schweiz und die Parteien vereinbaren, dass Gerichte der Schweiz exklusiv und endgültig zuständig sind für jede Streitigkeit, die sich aus dieser Lizenzvereinbarung ergibt.
 
-Diese Lizenzvereinbarung stellt die gesamte Vereinbarung zwischen dem Lizenzgeber und dem Lizenznehmer dar und ersetzt alle bisherigen oder gleichzeitigen Vereinbarungen, schriftlich oder mündlich.
-This is a license agreement for the Kore-Technology, version 1.0.1 as of January 2023. The agreement defines the "Kore-Technology" as the software and all its components and related documentation, the "Lizenzgeber" as the company or individual providing the Kore-Technology, and the "Lizenznehmer" as the person or company using, copying, installing, or modifying the Kore-Technology.
-
-Die Vereinbarung gewährt dem "Lizenznehmer" eine nicht-exklusive, nicht übertragbare Lizenz zur Verwendung der Kore-Technologie nur für interne Zwecke und nicht zum Verkauf oder zur Weitergabe an Dritte. Es erfordert auch, dass jede Verwendung, Vervielfältigung, Änderung oder Verteilung der Kore-Technologie durch den "Lizenznehmer" deutlich mit dem Urheberrechtshinweis des "Lizenzgebers" gekennzeichnet sein muss. Darüber hinaus ist es dem "Lizenznehmer" untersagt, die Kore-Technologie für schädliche oder illegale Aktivitäten zu nutzen.
-
-Die Kore-Technologie und alle zugehörigen Materialien sind urheberrechtlich geschützt und Eigentum des "Lizenzgebers". Alle Rechte, die in dieser Vereinbarung nicht ausdrücklich gewährt werden, verbleiben beim "Lizenzgeber" und dürfen ohne ihre schriftliche Genehmigung nicht verwendet oder übertragen werden.
-
-Die Vereinbarung enthält auch eine Haftungsbeschränkungsklausel, die besagt, dass der "Lizenzgeber" nicht für direkte oder indirekte Schäden haftet, die sich aus der Verwendung der Kore-Technologie durch den "Lizenznehmer" oder Dritte ergeben.
-
-Die Lizenzvereinbarung unterliegt dem Schweizer Recht, und alle daraus resultierenden Streitigkeiten werden ausschließlich von Schweizer Gerichten gelöst. Diese Lizenzvereinbarung ersetzt alle vorherigen oder gleichzeitigen Vereinbarungen, ob schriftlich oder mündlich, zwischen dem "Lizenzgeber" und dem "Lizenznehmer".
