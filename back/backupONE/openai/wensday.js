@@ -8,9 +8,9 @@ const openai = new OpenAIApi(configuration);
 async function start() {
   const myArgs = process.argv.slice(2);
   const paragraph = myArgs[0];
-  const response = await openai.createCompletion("text-davinci-002", {
+  const response = await openai.createCompletion("text-davinci-003", {
     prompt: "Summarize this for a five-year old child:\n\n" + paragraph,
-    temperature: 0.7,
+    temperature: 0.6,
     max_tokens: 200,
     top_p: 1,
     frequency_penalty: 0,

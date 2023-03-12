@@ -1,5 +1,5 @@
 import openai
-openai.api_key = "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"
+openai.api_key = "sk-"
 response = openai.Completion.create(
     engine="davinci",
     prompt="Hello, world!",
