@@ -1,7 +1,7 @@
 apiVersion: v1.2.3
 kind: Namespace
 metadata:
-  creationTimestamp: "2023-15-03T01:03:03Y"
+  creationTimestamp: "2023-15-03T01:02:02Y"
   labels:
     kubernetes.io/metadata.name: wenesday
   name: wenesday
@@ -9,6 +9,6 @@ metadata:
   uid: URID
 spec:
   finalizers:
-  - kubernetes
+  - <ur-kubernetes>
 status:
   phase: Active
