@@ -50,5 +50,6 @@ The following people have contributed to the development of the Wensday project:
 @wenesday@W (wenesday@lopez.codes)
 Nelson Lopez (nelson@it.lopez-be.ch)
 @w as ChatGPT prompt.
-
 If you would like to contribute to the project, please submit a pull request with your changes. We welcome all contributions!
+# free-wenesday-free
+-- Community-free-Version of WenesdayOS: 1.2.3
