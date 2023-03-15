@@ -1,5 +1,4 @@
-# free-wenesday-free
--- Community-free-Version of WenesdayOS: 1.2.3 
+# free-wenesday-free -- Community-free-Version of WenesdayOS: 1.2.3 
 
 wenesday - Kore-Technologie Lizenzvereinbarung Version 1.2.3 - Stand: Januar 2023
 
@@ -7,7 +6,7 @@ wenesday - Kore-Technologie Lizenzvereinbarung Version 1.2.3 - Stand: Januar 202
 >> TENSORFLOW INI
 >> USE OPENAI
 >> USE QUANTUM
->> REBULD GPT-616-Quantinium
+>> REBULD GPT-616-Quantinium (alias free-wenesday-free)
 
 Dependencies:
 
@@ -50,5 +49,6 @@ The following people have contributed to the development of the Wensday project:
 
 @wenesday(wenesday@lopez.codes)
 Nelson Lopez (nelson@it.lopez-be.ch)
-@w as ChatGPT4 prompt.
+@w as ChatGPT4 prompt
+
 If you would like to contribute to the project, please submit a pull request with your changes. We welcome all contributions!
