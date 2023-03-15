@@ -1,12 +1,12 @@
-apiVersion: v1
+apiVersion: v1.2.3
 kind: Namespace
 metadata:
-  creationTimestamp: "2023-01-01T01:23:45Y"
+  creationTimestamp: "2023-15-03T01:03:03Y"
   labels:
     kubernetes.io/metadata.name: wenesday
   name: wenesday
-  resourceVersion: "195"
-  uid: 3803119b-738f-4a93-81a0-f57346407382
+  resourceVersion: "1.2.3"
+  uid: URID
 spec:
   finalizers:
   - kubernetes

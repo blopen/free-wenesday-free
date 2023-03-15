@@ -1,0 +1,47 @@
+Provider: IT.lopez-be.ch >> lopez.codes >> lopez.zone >> lopez.one
+
+This repository contains code and files for the "Wenesday" project. Wenesday is a web application that allows users to create and share their favorite recipes, as well as browse recipes from other users.
+
+Getting Started:
+
+This project is a web application called "Wenesday" that allows users to create, share, and browse their favorite recipes. The application is built using React, React-Router, Redux, and Material-UI, and uses Firebase for backend functionality. The goal of Wenesday is to create a vibrant community of recipe enthusiasts and foster the exchange of culinary ideas.
+
+If you would like to contribute to the Wenesday project, you can do so by cloning the repository to your local machine. To do this, you will need to have Git installed on your computer. Once you have Git installed, you can clone the repository by running the following command in your terminal:
+
+git clone https://github.com/blopen/free-wenesday-free
+
+After you have cloned the repository, you can make changes to the code and files as needed. When you are ready to commit your changes, be sure to create a new branch and commit your changes to that branch. Once you have committed your changes, you can submit a pull request to the main branch for review.
+
+Dependencies:
+
+The Wenesday web application is built using the following dependencies:
+
+React
+React-Router
+Redux
+Material-UI
+Firebase
+License:
+
+The Wenesday project is licensed under the MIT License. See the LICENSE file for more details.
+
+License Amendment: Availability of Purchasing Version for Large Inquiries
+
+Licensee acknowledges and agrees that a commercial or enterprise version of the software may not be readily available for large inquiries. Licensor shall make reasonable efforts to accommodate Licensee's request for such version, but availability is not guaranteed.
+
+Contact Information:
+
+For further assistance or questions regarding the availability of a commercial or enterprise version, Licensee may contact Licensor at https://github.com/blopen, or visit https://it.lopez-be.ch.
+
+Effect of Amendment:
+
+This Amendment shall be deemed incorporated into and made a part of the Agreement, and all other terms and conditions of the Agreement shall remain in full force and effect.
+
+Contributors:
+
+The following people have contributed to the development of the Wenesday project:
+
+Wenesday (wenesday@lopez.codes)
+Nelson Lopez (nelson@it.lopez-be.ch)
+ChatGPT (alias @w)
+If you would like to contribute to the project, please submit a pull request with your changes. We welcome all contributions!
