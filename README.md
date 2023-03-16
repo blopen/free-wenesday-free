@@ -36,7 +36,7 @@ Availability of Purchasing Version for Large Inquiries
 Licensee acknowledges and agrees that the purchasing version of the Software will not be readily available for large inquiries. Licensor shall make reasonable efforts to accommodate Licensee's request for the purchasing version, but such availability is not guaranteed.
 
 Contact Information
-For further assistance or questions regarding the availability of the purchasing version for large inquiries, Licensee may contact Licensor at https://github.com/blopen, or visit https://it.lope-be.ch.
+For further assistance or questions regarding the availability of the purchasing version for large inquiries, Licensee may contact Licensor at https://github.com/blopen, or visit https://it.lopez-be.ch.
 
 Effect of Amendment
 This Amendment shall be deemed incorporated into and made a part of the Agreement, and all other terms and conditions of the Agreement shall remain in full force and effect.
