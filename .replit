@@ -2,3 +2,18 @@ modules = ["python-3.12", "web", "cpp-clang14", "nodejs-20"]
 
 [nix]
 channel = "stable-24_05"
+
+[workflows]
+runButton = "Run Wensday Web UI"
+
+[[workflows.workflow]]
+name = "Run Wensday Web UI"
+author = 28946914
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python app.py"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
