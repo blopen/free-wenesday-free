@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI-Modell Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .admin-panel {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .user-list {
+            margin-bottom: 30px;
+        }
+        
+        .user-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .model-section {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .model-item {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #e9e9e9;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        
+        .model-item.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .model-item.premium {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .toggle-btn {
+            background-color: #ddd;
+            border-radius: 15px;
+            padding: 3px 8px;
+            cursor: pointer;
+            user-select: none;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .toggle-btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .default-models {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+        
+        button.save {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button.save:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <h1>KI-Modell Administrationsbereich</h1>
+        <p>Eingeloggt als: <strong>{{ user_name }}</strong> (ID: {{ user_id }})</p>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('users')">Benutzer</button>
+            <button class="tab-btn" onclick="openTab('defaults')">Standardeinstellungen</button>
+        </div>
+        
+        <div id="users" class="tab-content active">
+            <h2>Benutzerverwaltung</h2>
+            
+            <div class="user-list">
+                <h3>Registrierte Benutzer:</h3>
+                {% if users %}
+                    {% for uid, data in users.items() %}
+                        <div class="user-item" data-user-id="{{ uid }}">
+                            <h4>Benutzer ID: {{ uid }}</h4>
+                            <div>
+                                <span class="label">Admin:</span>
+                                <span class="toggle-btn {% if data.is_admin %}active{% endif %}" onclick="toggleAdmin('{{ uid }}', this)">
+                                    {% if data.is_admin %}Ja{% else %}Nein{% endif %}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="label">Premium-Zugang:</span>
+                                <span class="toggle-btn {% if data.has_premium %}active{% endif %}" onclick="togglePremium('{{ uid }}', this)">
+                                    {% if data.has_premium %}Ja{% else %}Nein{% endif %}
+                                </span>
+                            </div>
+                            
+                            <div class="model-section">
+                                <h5>Freigeschaltete kostenlose Modelle:</h5>
+                                <div class="model-selection" id="free-models-{{ uid }}">
+                                    {% for model in default_models.free_models %}
+                                        <span class="model-item {% if model in data.free_models %}active{% endif %}" 
+                                              onclick="toggleModel('{{ uid }}', '{{ model }}', 'free', this)">
+                                            {{ model }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="model-section">
+                                <h5>Freigeschaltete Premium-Modelle:</h5>
+                                <div class="model-selection" id="premium-models-{{ uid }}">
+                                    {% for model in default_models.premium_models %}
+                                        <span class="model-item premium {% if model in data.premium_models %}active{% endif %}" 
+                                              onclick="toggleModel('{{ uid }}', '{{ model }}', 'premium', this)">
+                                            {{ model }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <button class="save" onclick="saveUserSettings('{{ uid }}')">Einstellungen speichern</button>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Keine Benutzer vorhanden.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div id="defaults" class="tab-content">
+            <h2>Standard-Modelleinstellungen</h2>
+            <div class="default-models">
+                <p>Diese Einstellungen gelten für alle neuen Benutzer und für Benutzer ohne eigene Einstellungen.</p>
+                
+                <div class="model-section">
+                    <h5>Standard kostenlose Modelle:</h5>
+                    <div class="model-selection" id="default-free-models">
+                        {% for model in default_models.free_models %}
+                            <span class="model-item active" 
+                                  onclick="toggleDefaultModel('{{ model }}', 'free', this)">
+                                {{ model }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="model-section">
+                    <h5>Standard Premium-Modelle:</h5>
+                    <div class="model-selection" id="default-premium-models">
+                        {% for model in default_models.premium_models %}
+                            <span class="model-item premium active" 
+                                  onclick="toggleDefaultModel('{{ model }}', 'premium', this)">
+                                {{ model }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <button class="save" onclick="saveDefaultSettings()">Standardeinstellungen speichern</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Globale Variablen zum Speichern der Modellauswahl
+        const userSettings = {};
+        const defaultSettings = {
+            free_models: Array.from(document.querySelectorAll('#default-free-models .model-item.active')).map(el => el.textContent.trim()),
+            premium_models: Array.from(document.querySelectorAll('#default-premium-models .model-item.active')).map(el => el.textContent.trim())
+        };
+        
+        // Tab-Funktionalität
+        function openTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+        
+        // Admin-Status umschalten
+        function toggleAdmin(userId, element) {
+            element.classList.toggle('active');
+            const isAdmin = element.classList.contains('active');
+            element.textContent = isAdmin ? 'Ja' : 'Nein';
+            
+            if (!userSettings[userId]) {
+                userSettings[userId] = {};
+            }
+            userSettings[userId].is_admin = isAdmin;
+        }
+        
+        // Premium-Status umschalten
+        function togglePremium(userId, element) {
+            element.classList.toggle('active');
+            const hasPremium = element.classList.contains('active');
+            element.textContent = hasPremium ? 'Ja' : 'Nein';
+            
+            if (!userSettings[userId]) {
+                userSettings[userId] = {};
+            }
+            userSettings[userId].has_premium = hasPremium;
+        }
+        
+        // Modell-Status umschalten
+        function toggleModel(userId, model, modelType, element) {
+            element.classList.toggle('active');
+            
+            if (!userSettings[userId]) {
+                userSettings[userId] = {};
+            }
+            
+            const modelKey = modelType === 'free' ? 'free_models' : 'premium_models';
+            if (!userSettings[userId][modelKey]) {
+                // Alle aktiven Modelle dieses Typs abrufen
+                userSettings[userId][modelKey] = Array.from(document.querySelectorAll(`#${modelType}-models-${userId} .model-item.active`))
+                    .map(el => el.textContent.trim());
+            } else {
+                // Modell hinzufügen oder entfernen
+                if (element.classList.contains('active')) {
+                    if (!userSettings[userId][modelKey].includes(model)) {
+                        userSettings[userId][modelKey].push(model);
+                    }
+                } else {
+                    userSettings[userId][modelKey] = userSettings[userId][modelKey].filter(m => m !== model);
+                }
+            }
+        }
+        
+        // Standard-Modell-Status umschalten
+        function toggleDefaultModel(model, modelType, element) {
+            element.classList.toggle('active');
+            
+            const modelKey = modelType === 'free' ? 'free_models' : 'premium_models';
+            
+            if (element.classList.contains('active')) {
+                if (!defaultSettings[modelKey].includes(model)) {
+                    defaultSettings[modelKey].push(model);
+                }
+            } else {
+                defaultSettings[modelKey] = defaultSettings[modelKey].filter(m => m !== model);
+            }
+        }
+        
+        // Benutzereinstellungen speichern
+        function saveUserSettings(userId) {
+            if (!userSettings[userId]) {
+                alert('Keine Änderungen vorgenommen.');
+                return;
+            }
+            
+            fetch(`/admin/user/${userId}/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userSettings[userId])
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Benutzereinstellungen erfolgreich gespeichert!');
+                    // Zurücksetzen der gespeicherten Änderungen
+                    delete userSettings[userId];
+                } else {
+                    alert('Fehler beim Speichern: ' + (data.error || 'Unbekannter Fehler'));
+                }
+            })
+            .catch(error => {
+                alert('Fehler beim Speichern: ' + error);
+            });
+        }
+        
+        // Standardeinstellungen speichern
+        function saveDefaultSettings() {
+            fetch('/admin/default/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(defaultSettings)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Standardeinstellungen erfolgreich gespeichert!');
+                } else {
+                    alert('Fehler beim Speichern: ' + (data.error || 'Unbekannter Fehler'));
+                }
+            })
+            .catch(error => {
+                alert('Fehler beim Speichern: ' + error);
+            });
+        }
+    </script>
+</body>
+</html>
