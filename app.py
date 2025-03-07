@@ -13,14 +13,19 @@ Session(app)
 
 # Verfügbare KI-Modelle
 MODELS = {
-    "gpt-3.5-turbo": {"service": "openai", "free": True},
-    "gpt-4": {"service": "openai", "free": False},
-    "claude-instant": {"service": "anthropic", "free": True},
-    "claude-2": {"service": "anthropic", "free": False},
-    "claude-free": {"service": "anthropic-free", "free": True},
-    "gemini-pro": {"service": "google", "free": True},
-    "llama2-70b": {"service": "meta", "free": True},
-    "pi": {"service": "inflection", "free": True}
+    "gpt-3.5-turbo": {"service": "openai", "free": True, "max_tokens": 4096},
+    "gpt-4": {"service": "openai", "free": False, "max_tokens": 8192},
+    "gpt-4-turbo": {"service": "openai", "free": False, "max_tokens": 16384},
+    "claude-instant": {"service": "anthropic", "free": True, "max_tokens": 4096},
+    "claude-2": {"service": "anthropic", "free": False, "max_tokens": 8192},
+    "claude-3-opus": {"service": "anthropic", "free": False, "max_tokens": 16384},
+    "claude-3-sonnet": {"service": "anthropic", "free": False, "max_tokens": 12288},
+    "claude-free": {"service": "anthropic-free", "free": True, "max_tokens": 2048},
+    "gemini-pro": {"service": "google", "free": True, "max_tokens": 4096},
+    "gemini-ultra": {"service": "google", "free": False, "max_tokens": 8192},
+    "llama2-70b": {"service": "meta", "free": True, "max_tokens": 4096},
+    "llama3-70b": {"service": "meta", "free": False, "max_tokens": 8192},
+    "pi": {"service": "inflection", "free": True, "max_tokens": 2048}
 }
 
 @app.route('/')
@@ -83,58 +88,156 @@ def chat():
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json"
                 }
+                
+                max_tokens = model_info.get('max_tokens', 2048)
+                
                 payload = {
                     "model": model,
-                    "messages": chat_history
+                    "messages": chat_history,
+                    "temperature": 0.7,
+                    "max_tokens": min(max_tokens // 2, 2048),  # Use half of available context
+                    "top_p": 1,
+                    "frequency_penalty": 0,
+                    "presence_penalty": 0
                 }
-                api_response = requests.post("https://api.openai.com/v1/chat/completions", 
-                                           headers=headers, 
-                                           json=payload)
                 
-                if api_response.status_code == 200:
-                    response_data = api_response.json()
-                    response = response_data['choices'][0]['message']['content']
-                else:
+                try:
+                    api_response = requests.post(
+                        "https://api.openai.com/v1/chat/completions", 
+                        headers=headers, 
+                        json=payload,
+                        timeout=30  # Set timeout to 30 seconds
+                    )
+                    
+                    if api_response.status_code == 200:
+                        response_data = api_response.json()
+                        response = response_data['choices'][0]['message']['content']
+                    else:
+                        error_data = api_response.json() if api_response.text else {"error": "Unknown API error"}
+                        error_message = error_data.get("error", {}).get("message", str(error_data))
+                        
+                        return jsonify({
+                            "success": False,
+                            "error": f"OpenAI API-Fehler: {error_message}"
+                        })
+                except requests.exceptions.Timeout:
                     return jsonify({
                         "success": False,
-                        "error": f"API-Fehler: {api_response.text}"
+                        "error": "Die Anfrage hat das Zeitlimit überschritten. Bitte versuchen Sie es erneut."
+                    })
+                except requests.exceptions.ConnectionError:
+                    return jsonify({
+                        "success": False,
+                        "error": "Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung."
+                    })
+                except Exception as e:
+                    return jsonify({
+                        "success": False,
+                        "error": f"Unerwarteter Fehler: {str(e)}"
                     })
             else:
-                # Freie Version (simuliert öffentliche API)
-                response = f"Dies ist eine simulierte Antwort vom freien {model}-Modell: Ich antworte auf '{message}'"
+                # Freie Version - Verwende Demo-API wenn verfügbar, sonst Simulation
+                try:
+                    response = f"Dies ist eine simulierte Antwort vom {model}-Modell. Für vollständige Funktionalität fügen Sie bitte Ihren API-Schlüssel hinzu. Ich versuche, auf '{message}' zu antworten."
+                except Exception:
+                    response = f"Simulierte Antwort: Hallo! Ich bin ein Assistent. Wie kann ich dir helfen?"
         
         elif service == "anthropic":
             # Implementierung für Claude-Modelle
             if api_key:
-                headers = {
-                    "x-api-key": api_key,
-                    "Content-Type": "application/json"
-                }
+                # Check if we're using Claude 3 models
+                is_claude3 = "claude-3" in model
+                max_tokens = model_info.get('max_tokens', 2048)
                 
-                # Konvertiere Chat-History in das Claude-Format
-                claude_messages = "\n\n".join([f"{msg['role']}: {msg['content']}" for msg in chat_history])
-                
-                payload = {
-                    "prompt": claude_messages + "\n\nassistant:",
-                    "model": model,
-                    "max_tokens_to_sample": 500
-                }
-                
-                api_response = requests.post("https://api.anthropic.com/v1/complete", 
-                                           headers=headers, 
-                                           json=payload)
-                
-                if api_response.status_code == 200:
-                    response_data = api_response.json()
-                    response = response_data['completion']
+                if is_claude3:
+                    # Claude 3 API uses messages API similar to OpenAI
+                    headers = {
+                        "x-api-key": api_key,
+                        "anthropic-version": "2023-06-01",
+                        "Content-Type": "application/json"
+                    }
+                    
+                    # Convert standard chat format to Claude 3 format
+                    claude_messages = []
+                    for msg in chat_history:
+                        role = "assistant" if msg["role"] == "assistant" else "user"
+                        claude_messages.append({"role": role, "content": msg["content"]})
+                    
+                    payload = {
+                        "model": model,
+                        "messages": claude_messages,
+                        "max_tokens": min(max_tokens // 2, 1024),
+                        "temperature": 0.7
+                    }
+                    
+                    try:
+                        api_response = requests.post(
+                            "https://api.anthropic.com/v1/messages", 
+                            headers=headers, 
+                            json=payload,
+                            timeout=30
+                        )
+                        
+                        if api_response.status_code == 200:
+                            response_data = api_response.json()
+                            response = response_data['content'][0]['text']
+                        else:
+                            error_data = api_response.json() if api_response.text else {"error": "Unknown API error"}
+                            error_message = error_data.get("error", {}).get("message", str(error_data))
+                            
+                            return jsonify({
+                                "success": False,
+                                "error": f"Anthropic API-Fehler: {error_message}"
+                            })
+                    except Exception as e:
+                        return jsonify({
+                            "success": False,
+                            "error": f"Anthropic API-Fehler: {str(e)}"
+                        })
                 else:
-                    return jsonify({
-                        "success": False,
-                        "error": f"API-Fehler: {api_response.text}"
-                    })
+                    # Legacy Claude API (Claude 2, Claude Instant)
+                    headers = {
+                        "x-api-key": api_key,
+                        "Content-Type": "application/json"
+                    }
+                    
+                    # Convert chat history to Claude format
+                    claude_messages = "\n\n".join([f"{msg['role']}: {msg['content']}" for msg in chat_history])
+                    
+                    payload = {
+                        "prompt": claude_messages + "\n\nassistant:",
+                        "model": model,
+                        "max_tokens_to_sample": min(max_tokens // 2, 1024),
+                        "temperature": 0.7
+                    }
+                    
+                    try:
+                        api_response = requests.post(
+                            "https://api.anthropic.com/v1/complete", 
+                            headers=headers, 
+                            json=payload,
+                            timeout=30
+                        )
+                        
+                        if api_response.status_code == 200:
+                            response_data = api_response.json()
+                            response = response_data['completion']
+                        else:
+                            error_data = api_response.json() if api_response.text else {"error": "Unknown API error"}
+                            error_message = error_data.get("error", {}).get("message", str(error_data))
+                            
+                            return jsonify({
+                                "success": False,
+                                "error": f"Anthropic API-Fehler: {error_message}"
+                            })
+                    except Exception as e:
+                        return jsonify({
+                            "success": False,
+                            "error": f"Anthropic API-Fehler: {str(e)}"
+                        })
             else:
                 # Freie Version (simuliert)
-                response = f"Dies ist eine simulierte Antwort vom freien {model}-Modell: Ich antworte auf '{message}'"
+                response = f"Dies ist eine simulierte Antwort vom {model}-Modell. Für vollständige Funktionalität fügen Sie bitte Ihren API-Schlüssel hinzu. Ich versuche, auf '{message}' zu antworten."
         
         elif service == "anthropic-free":
             # Integration mit kostenloser Claude API

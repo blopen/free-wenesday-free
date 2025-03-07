@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KI-Chat-Interface</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="description" content="Ein KI-Chat-Interface mit verschiedenen KI-Modellen">
+    <meta name="theme-color" content="#2196F3">
 </head>
 <body>
     <div class="container">
@@ -40,7 +42,6 @@
                         <select id="api-service">
                             <option value="openai">OpenAI</option>
                             <option value="anthropic">Anthropic</option>
-                            <option value="anthropic-free">Anthropic (Free)</option>
                             <option value="google">Google</option>
                             <option value="meta">Meta</option>
                             <option value="inflection">Inflection</option>
@@ -65,7 +66,7 @@
                 </div>
                 
                 <div class="chat-input">
-                    <textarea id="message-input" placeholder="Nachricht eingeben..."></textarea>
+                    <textarea id="message-input" placeholder="Nachricht eingeben..." rows="1"></textarea>
                     <button id="send-message">Senden</button>
                 </div>
             </div>
