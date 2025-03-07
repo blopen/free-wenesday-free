@@ -1,0 +1,42 @@
+{
+    "default": {
+        "free_models": [
+            "gpt-3.5-turbo",
+            "claude-instant",
+            "claude-free",
+            "gemini-pro",
+            "llama2-70b"
+        ],
+        "premium_models": [
+            "gpt-4",
+            "gpt-4-turbo",
+            "claude-2",
+            "claude-3-opus",
+            "claude-3-sonnet",
+            "gemini-ultra",
+            "llama3-70b"
+        ]
+    },
+    "users": {
+        "admin_user_12345": {
+            "free_models": [
+                "gpt-3.5-turbo",
+                "claude-instant",
+                "claude-free",
+                "gemini-pro",
+                "llama2-70b"
+            ],
+            "premium_models": [
+                "gpt-4",
+                "gpt-4-turbo",
+                "claude-2",
+                "claude-3-opus",
+                "claude-3-sonnet",
+                "gemini-ultra",
+                "llama3-70b"
+            ],
+            "has_premium": true,
+            "is_admin": true
+        }
+    }
+}
