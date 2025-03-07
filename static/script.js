@@ -131,6 +131,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Erstellen der iframe-Proxy-Instanz
+    const iframeProxy = new ModelIframeProxy();
+    
+    // Prüfen ob ein Modell kostenlos ist
+    function isFreeModel(model) {
+        const freeModels = [
+            'claude-free', 
+            'gpt-3.5-turbo', 
+            'gemini-pro', 
+            'llama2-70b', 
+            'pi'
+        ];
+        return freeModels.includes(model);
+    }
+
     // Send message function
     function sendMessage() {
         const message = messageInput.value.trim();
@@ -149,6 +164,31 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show typing indicator
         showTypingIndicator();
 
+        // Verwende den iframe-Proxy für freie Modelle
+        if (isFreeModel(activeModel)) {
+            // Versuche echte Antworten über iframe-Proxy zu erhalten
+            iframeProxy.requestModelResponse(activeModel, message, function(response) {
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                if (response.includes("Timeout") || response.includes("simulierte Antwort")) {
+                    // Wenn der Proxy fehlschlägt, Fallback auf Server-Anfrage
+                    addSystemMessage("Direkter Proxy fehlgeschlagen, verwende Server-API...");
+                    sendMessageToServer(message);
+                } else {
+                    // Display bot response from iframe
+                    addMessage(response, 'bot');
+                    isProcessing = false;
+                }
+            });
+        } else {
+            // Premium-Modelle verwenden weiterhin die Server-API
+            sendMessageToServer(message);
+        }
+    }
+    
+    // Funktion zum Senden der Nachricht an den Server (für Premium-Modelle oder Fallback)
+    function sendMessageToServer(message) {
         // AJAX request to send message
         fetch('/chat', {
             method: 'POST',

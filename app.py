@@ -145,11 +145,46 @@ def chat():
                         "error": f"Unerwarteter Fehler: {str(e)}"
                     })
             else:
-                # Freie Version - Verwende Demo-API wenn verfügbar, sonst Simulation
-                try:
-                    response = f"Dies ist eine simulierte Antwort vom {model}-Modell. Für vollständige Funktionalität fügen Sie bitte Ihren API-Schlüssel hinzu. Ich versuche, auf '{message}' zu antworten."
-                except Exception:
-                    response = f"Simulierte Antwort: Hallo! Ich bin ein Assistent. Wie kann ich dir helfen?"
+                # Freie Version - Verwende Proxy-API
+                proxy_url = MODEL_PROXY_URLS.get(model)
+                
+                if proxy_url:
+                    try:
+                        # Versuch, das öffentliche Proxy-API zu nutzen
+                        headers = {
+                            "Content-Type": "application/json",
+                            "X-Proxy-Request": "true"
+                        }
+                        
+                        payload = {
+                            "messages": chat_history,
+                            "message": message
+                        }
+                        
+                        # Versuche, die öffentliche API über den Server anzusprechen
+                        api_response = requests.post(
+                            proxy_url,
+                            headers=headers,
+                            json=payload,
+                            timeout=5
+                        )
+                        
+                        if api_response.status_code == 200:
+                            response_data = api_response.json()
+                            response = response_data.get('response', "Die API ist momentan nicht erreichbar. Der Client-seitige Proxy wird versuchen, eine Antwort zu erhalten.")
+                        else:
+                            # Falls Server-Proxy fehlschlägt, Fallback auf Client-seitigen Proxy
+                            response = "Das freie Modell kann nicht über den Server erreicht werden. Der Client-seitige Proxy wird verwendet. Bitte warten Sie einen Moment..."
+                    
+                    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+                        # Timeout oder Verbindungsfehler
+                        response = "Server-Timeout beim Versuch, das Modell zu erreichen. Der Client-seitige Proxy wird verwendet. Bitte warten Sie einen Moment..."
+                    
+                    except Exception as e:
+                        response = f"Fehler beim Zugriff auf die öffentliche API: {str(e)}. Der Client-seitige Proxy wird versuchen, eine Antwort zu erhalten."
+                else:
+                    # Kein Proxy-URL für dieses Modell konfiguriert
+                    response = f"Für das Modell {model} ist kein öffentlicher Proxy konfiguriert. Bitte wählen Sie ein anderes Modell oder fügen Sie Ihren API-Schlüssel hinzu."
 
         elif service == "anthropic":
             # Implementierung für Claude-Modelle
@@ -249,7 +284,7 @@ def chat():
                 response = f"Dies ist eine simulierte Antwort vom {model}-Modell. Für vollständige Funktionalität fügen Sie bitte Ihren API-Schlüssel hinzu. Ich versuche, auf '{message}' zu antworten."
 
         elif service == "anthropic-free":
-            # Integration mit kostenloser Claude API
+            # Integration mit kostenloser Claude API über Proxy
             # Bereite Chat-Kontext im Format für Claude vor
             formatted_history = []
 
@@ -259,36 +294,46 @@ def chat():
                 elif msg["role"] == "assistant":
                     formatted_history.append({"role": "assistant", "content": msg["content"]})
 
-            # Verwende eine öffentliche Claude-Demo-API
-            try:
-                # Simulierte Implementierung des freien Claude-Modells
-                # Diese Implementierung verwendet einen einfachen NLP-Ansatz, der auf der Nachricht und früheren Interaktionen basiert
-
-                # Kontext aus dem Chat-Verlauf extrahieren
-                context = " ".join([msg["content"] for msg in chat_history[-5:]])  # Verwende die letzten 5 Nachrichten als Kontext
-
-                # Einfache Antwortgenerierung basierend auf Schlüsselwörtern
-                if "hallo" in message.lower() or "hi" in message.lower() or "guten tag" in message.lower():
-                    response = "Hallo! Ich bin Claude, wie kann ich dir heute helfen?"
-                elif "wie geht es dir" in message.lower():
-                    response = "Mir geht es gut, danke der Nachfrage! Als KI habe ich keine Gefühle, aber ich bin bereit, dir zu helfen."
-                elif "was kannst du" in message.lower() or "fähigkeiten" in message.lower():
-                    response = "Als Claude-Modell kann ich Fragen beantworten, bei Textgenerierung helfen, Informationen analysieren und in Gesprächen unterstützen. Ich versuche, hilfreiche, höfliche und präzise Antworten zu geben."
-                elif "danke" in message.lower():
-                    response = "Gerne! Wenn du weitere Fragen hast, stehe ich dir zur Verfügung."
-                elif "wetter" in message.lower():
-                    response = "Als KI habe ich leider keinen Zugriff auf aktuelle Wetterdaten. Es wäre am besten, einen Wetterdienst oder eine Wetter-App zu nutzen."
-                elif any(q in message.lower() for q in ["warum", "wieso", "weshalb"]):
-                    response = "Das ist eine interessante Frage. Es gibt verschiedene Faktoren zu berücksichtigen. Könnte ich mehr Kontext bekommen, um eine präzisere Antwort zu geben?"
-                elif "erklär" in message.lower() or "erkläre" in message.lower():
-                    topic = message.lower().replace("erklär", "").replace("erkläre", "").strip()
-                    response = f"Ich versuche, {topic} zu erklären: Es handelt sich um ein komplexes Thema mit verschiedenen Aspekten. Möchtest du, dass ich auf einen bestimmten Teil davon näher eingehe?"
-                else:
-                    # Fallback-Antwort für alle anderen Anfragen
-                    response = f"Ich verstehe deine Anfrage zu '{message}'. Als kostenlose Version von Claude kann ich dir hierzu grundlegende Informationen geben. Für detailliertere Analysen würde ich die vollständige Claude-Version empfehlen. Kann ich dir mit etwas anderem helfen?"
-
-            except Exception as e:
-                response = "Es tut mir leid, ich konnte deine Anfrage nicht verarbeiten. Bitte versuche es noch einmal mit einer anderen Formulierung."
+            # Get proxy URL from config
+            proxy_url = MODEL_PROXY_URLS.get(model)
+            
+            if proxy_url:
+                try:
+                    # Versuch, das öffentliche Proxy-API zu nutzen
+                    headers = {
+                        "Content-Type": "application/json",
+                        "X-Proxy-Request": "true"
+                    }
+                    
+                    payload = {
+                        "messages": formatted_history,
+                        "message": message
+                    }
+                    
+                    # Versuche, die öffentliche API über den Server anzusprechen
+                    api_response = requests.post(
+                        proxy_url,
+                        headers=headers,
+                        json=payload,
+                        timeout=5  # Kurzes Timeout, da der Client direkten Proxy nutzen soll
+                    )
+                    
+                    if api_response.status_code == 200:
+                        response_data = api_response.json()
+                        response = response_data.get('response', "Die API ist momentan nicht erreichbar. Bitte versuchen Sie es später erneut.")
+                    else:
+                        # Falls Server-Proxy fehlschlägt, Fallback auf Client-seitigen Proxy
+                        response = "Das freie Modell kann nicht über den Server erreicht werden. Der Client-seitige Proxy wird verwendet. Bitte warten Sie einen Moment..."
+                
+                except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+                    # Timeout oder Verbindungsfehler - Client-seitigen Proxy verwenden
+                    response = "Server-Timeout beim Versuch, das Modell zu erreichen. Der Client-seitige Proxy wird verwendet. Bitte warten Sie einen Moment..."
+                
+                except Exception as e:
+                    response = f"Fehler beim Zugriff auf die öffentliche API: {str(e)}. Der Client-seitige Proxy wird versuchen, eine Antwort zu erhalten."
+            else:
+                # Kein Proxy-URL für dieses Modell konfiguriert
+                response = f"Für das Modell {model} ist kein öffentlicher Proxy konfiguriert. Bitte wählen Sie ein anderes Modell oder fügen Sie Ihren API-Schlüssel hinzu."
 
         else:
             # Für andere Modelle (simuliert)
