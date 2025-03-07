@@ -4,10 +4,18 @@
 # URLs für die verschiedenen Modell-Proxies
 MODEL_PROXY_URLS = {
     "claude-free": "https://api-proxy.claude.service/chat",
+    "claude-instant": "https://api-proxy.claude.service/chat",
     "gpt-3.5-turbo": "https://api-proxy.openai.service/chat",
     "gemini-pro": "https://api-proxy.gemini.service/chat",
     "llama2-70b": "https://api-proxy.llama2.service/chat",
     "pi": "https://api-proxy.inflection.service/chat"
+}
+
+# CORS-Proxy-URLs für Web-APIs
+CORS_PROXY_URLS = {
+    "base": "https://corsproxy.io/?",
+    "alt1": "https://cors-anywhere.herokuapp.com/",
+    "alt2": "https://api.allorigins.win/raw?url="
 }
 
 # API-Ratelimits für freie Modelle (Anfragen pro Minute)

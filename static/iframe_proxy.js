@@ -5,24 +5,33 @@ class ModelIframeProxy {
     this.activeFrames = {};
     this.responseCallbacks = {};
     this.frameCounter = 0;
-    
+    this.initMessageListener();
+    console.log("ModelIframeProxy initialisiert");
+  }
+  
+  initMessageListener() {
     // Event-Listener für Nachrichten von den iframes
-    window.addEventListener('message', (event) => {
-      // Sicherheits-Check für Origin
-      if (this.isTrustedOrigin(event.origin)) {
-        try {
-          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-          if (data.type === 'model_response' && data.requestId && this.responseCallbacks[data.requestId]) {
-            // Callback mit der Antwort aufrufen
-            this.responseCallbacks[data.requestId](data.response);
-            // Callback und iframe aufräumen
-            this.cleanupFrame(data.requestId);
-          }
-        } catch (e) {
-          console.error('Fehler beim Verarbeiten der iframe-Nachricht:', e);
+    window.addEventListener('message', this.handleMessage.bind(this));
+  }
+  
+  handleMessage(event) {
+    // Sicherheits-Check für Origin
+    if (this.isTrustedOrigin(event.origin)) {
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data.type === 'model_response' && data.requestId && this.responseCallbacks[data.requestId]) {
+          console.log("Antwort vom iframe erhalten:", data.requestId);
+          // Callback mit der Antwort aufrufen
+          this.responseCallbacks[data.requestId](data.response);
+          // Callback und iframe aufräumen
+          this.cleanupFrame(data.requestId);
         }
+      } catch (e) {
+        console.error('Fehler beim Verarbeiten der iframe-Nachricht:', e);
       }
-    });
+    } else {
+      console.warn("Nachricht von nicht vertrauenswürdiger Quelle:", event.origin);
+    }
   }
   
   // Überprüfen, ob die Nachricht von einer vertrauenswürdigen Quelle kommt
@@ -31,16 +40,62 @@ class ModelIframeProxy {
       'https://claude.ai',
       'https://chat.openai.com',
       'https://gemini.google.com',
-      'https://pi.ai'
-      // Weitere vertrauenswürdige Quellen hier hinzufügen
+      'https://bard.google.com',
+      'https://pi.ai',
+      window.location.origin
     ];
-    return trustedOrigins.includes(origin);
+    
+    // Check if origin begins with any trusted origin
+    return trustedOrigins.some(trusted => origin === trusted || origin.startsWith(trusted));
+  }
+  
+  // Direkte Web-API-Anfrage mit CORS-Proxy
+  makeProxyRequest(endpoint, payload, callback) {
+    const corsProxyUrl = 'https://corsproxy.io/?';
+    const apiUrl = corsProxyUrl + encodeURIComponent(endpoint);
+    
+    console.log("Sende Anfrage an Web-API über CORS-Proxy:", endpoint);
+    
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log("Antwort von Web-API erhalten");
+      callback(data.response || data.choices?.[0]?.text || data.content || JSON.stringify(data));
+    })
+    .catch(error => {
+      console.error("Fehler bei der Web-API-Anfrage:", error);
+      callback(`Fehler bei der Web-API-Anfrage: ${error.message}. Versuche alternativen Zugriff...`);
+      this.fallbackToIframeMethod(endpoint, payload, callback);
+    });
+  }
+  
+  // Fallback auf iframe-Methode, wenn direkte API fehlschlägt
+  fallbackToIframeMethod(endpoint, payload, callback) {
+    const model = payload.model || 'claude-free';
+    const message = payload.message || payload.prompt || 
+                  (payload.messages ? JSON.stringify(payload.messages) : "Keine Nachricht");
+    
+    this.requestModelResponse(model, message, callback);
   }
   
   // Modell-Anfrage über iframe
   requestModelResponse(modelType, prompt, callback) {
     const requestId = `req_${Date.now()}_${this.frameCounter++}`;
     this.responseCallbacks[requestId] = callback;
+    
+    console.log(`Erstelle iframe für ${modelType}-Anfrage mit ID: ${requestId}`);
     
     // iframe erstellen und zur Seite hinzufügen
     const iframe = document.createElement('iframe');
@@ -54,16 +109,23 @@ class ModelIframeProxy {
     let iframeUrl;
     switch(modelType) {
       case 'claude-free':
-        iframeUrl = `https://proxy-api.claudeai.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
+      case 'claude-instant':
+        iframeUrl = `https://api-proxy.claudeai.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
         break;
       case 'gpt-3.5-turbo':
-        iframeUrl = `https://proxy-api.openai.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
+        iframeUrl = `https://api-proxy.openai.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
         break;
       case 'gemini-pro':
-        iframeUrl = `https://proxy-api.gemini.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
+        iframeUrl = `https://api-proxy.gemini.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
         break;
-      // Weitere Modelle hier hinzufügen
+      case 'pi':
+        iframeUrl = `https://api-proxy.inflection.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
+        break;
+      case 'llama2-70b':
+        iframeUrl = `https://api-proxy.llama2.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
+        break;
       default:
+        console.warn(`Keine bekannte Proxy-URL für Modell ${modelType}`);
         callback(`Keine öffentliche API für Modell ${modelType} verfügbar.`);
         return;
     }
@@ -72,18 +134,22 @@ class ModelIframeProxy {
     document.body.appendChild(iframe);
     this.activeFrames[requestId] = iframe;
     
+    console.log(`iframe für ${modelType} erstellt und zur Seite hinzugefügt`);
+    
     // Timeout für den Fall, dass keine Antwort kommt
     setTimeout(() => {
       if (this.responseCallbacks[requestId]) {
-        callback(`Keine Antwort von ${modelType} erhalten (Timeout). Fällt zurück auf simulierte Antwort.`);
+        console.warn(`Timeout für Anfrage ${requestId}`);
+        callback(`Keine Antwort von ${modelType} erhalten (Timeout). Versuche direkte Server-Anfrage...`);
         this.cleanupFrame(requestId);
       }
-    }, 20000); // 20 Sekunden Timeout
+    }, 15000); // 15 Sekunden Timeout
   }
   
   // iframe und Callback aufräumen
   cleanupFrame(requestId) {
     if (this.activeFrames[requestId]) {
+      console.log(`Entferne iframe für Anfrage ${requestId}`);
       document.body.removeChild(this.activeFrames[requestId]);
       delete this.activeFrames[requestId];
     }
@@ -91,5 +157,5 @@ class ModelIframeProxy {
   }
 }
 
-// Exportiere die Klasse für die Verwendung in script.js
+// Stelle sicher, dass diese Klasse global verfügbar ist
 window.ModelIframeProxy = ModelIframeProxy;

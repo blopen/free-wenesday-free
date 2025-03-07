@@ -131,13 +131,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Erstellen der iframe-Proxy-Instanz
-    const iframeProxy = new ModelIframeProxy();
+    // Erstellen der iframe-Proxy-Instanz und stellen sicher, dass es nur eine gibt
+    let iframeProxy; 
+    try {
+        // Prüfen, ob bereits eine Instanz existiert
+        if (!window.proxyInstance) {
+            window.proxyInstance = new ModelIframeProxy();
+            console.log("Neue ModelIframeProxy-Instanz erstellt");
+        }
+        iframeProxy = window.proxyInstance;
+    } catch (e) {
+        console.error("Fehler beim Erstellen des ModelIframeProxy:", e);
+        // Fallback-Objekt erstellen, falls die Klasse nicht verfügbar ist
+        iframeProxy = {
+            requestModelResponse: function(model, message, callback) {
+                callback("Proxy-Modul nicht verfügbar. Versuche Server-Anfrage...");
+            },
+            makeProxyRequest: function(endpoint, payload, callback) {
+                callback("Proxy-Modul nicht verfügbar. Versuche Server-Anfrage...");
+            }
+        };
+    }
     
     // Prüfen ob ein Modell kostenlos ist
     function isFreeModel(model) {
         const freeModels = [
             'claude-free', 
+            'claude-instant',
             'gpt-3.5-turbo', 
             'gemini-pro', 
             'llama2-70b', 
@@ -145,6 +165,15 @@ document.addEventListener('DOMContentLoaded', function() {
         ];
         return freeModels.includes(model);
     }
+
+    // Öffentliche APIs für verschiedene Modelle
+    const publicEndpoints = {
+        'claude-free': 'https://api.anthropic.com/v1/complete',
+        'claude-instant': 'https://api.anthropic.com/v1/complete',
+        'gpt-3.5-turbo': 'https://api.openai.com/v1/chat/completions',
+        'gemini-pro': 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+        'pi': 'https://api.inflection.ai/v1/chat/completions'
+    };
 
     // Send message function
     function sendMessage() {
@@ -164,27 +193,75 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show typing indicator
         showTypingIndicator();
 
-        // Verwende den iframe-Proxy für freie Modelle
+        // Verwende den verbesserten Web-Proxy für freie Modelle
         if (isFreeModel(activeModel)) {
-            // Versuche echte Antworten über iframe-Proxy zu erhalten
-            iframeProxy.requestModelResponse(activeModel, message, function(response) {
-                // Hide typing indicator
-                hideTypingIndicator();
-                
-                if (response.includes("Timeout") || response.includes("simulierte Antwort")) {
-                    // Wenn der Proxy fehlschlägt, Fallback auf Server-Anfrage
-                    addSystemMessage("Direkter Proxy fehlgeschlagen, verwende Server-API...");
-                    sendMessageToServer(message);
-                } else {
-                    // Display bot response from iframe
-                    addMessage(response, 'bot');
-                    isProcessing = false;
-                }
-            });
+            console.log(`Verwende Web-Proxy für ${activeModel}`);
+            
+            // Bereite Payload für die API-Anfrage vor
+            let payload = {};
+            const endpoint = publicEndpoints[activeModel];
+            
+            if (activeModel.includes('claude')) {
+                payload = {
+                    model: activeModel,
+                    prompt: `\n\nHuman: ${message}\n\nAssistant:`,
+                    max_tokens_to_sample: 1000,
+                    temperature: 0.7
+                };
+            } else if (activeModel.includes('gpt')) {
+                payload = {
+                    model: activeModel,
+                    messages: [{ role: "user", content: message }],
+                    max_tokens: 1000,
+                    temperature: 0.7
+                };
+            } else {
+                // Generisches Format für andere Modelle
+                payload = {
+                    model: activeModel,
+                    message: message,
+                    max_tokens: 1000
+                };
+            }
+            
+            // Versuche direkte Web-API-Anfrage über CORS-Proxy
+            if (endpoint) {
+                addSystemMessage(`Versuche direkte Anfrage an ${activeModel} über Web-Proxy...`);
+                iframeProxy.makeProxyRequest(endpoint, payload, handleProxyResponse);
+            } else {
+                // Fallback auf iframe-Methode, wenn kein Endpunkt konfiguriert ist
+                addSystemMessage(`Verwende iframe-Proxy für ${activeModel}...`);
+                iframeProxy.requestModelResponse(activeModel, message, handleProxyResponse);
+            }
         } else {
             // Premium-Modelle verwenden weiterhin die Server-API
             sendMessageToServer(message);
         }
+    }
+    
+    // Handler für Proxy-Antworten
+    function handleProxyResponse(response) {
+        // Hide typing indicator
+        hideTypingIndicator();
+        
+        if (response.includes("Fehler") || response.includes("Timeout") || response.includes("simulierte Antwort")) {
+            // Wenn der Proxy fehlschlägt, Fallback auf Server-Anfrage
+            addSystemMessage("Web-Proxy fehlgeschlagen, verwende Server-API...");
+            sendMessageToServer(messageInput.value.trim() || getLastUserMessage());
+        } else {
+            // Display bot response from proxy
+            addMessage(response, 'bot');
+            isProcessing = false;
+        }
+    }
+    
+    // Hilfsfunktion, um die letzte Benutzeranfrage zu erhalten
+    function getLastUserMessage() {
+        const userMessages = chatMessages.querySelectorAll('.message-user .message-content');
+        if (userMessages.length > 0) {
+            return userMessages[userMessages.length - 1].textContent;
+        }
+        return "";
     }
     
     // Funktion zum Senden der Nachricht an den Server (für Premium-Modelle oder Fallback)
