@@ -358,3 +358,42 @@ def chat():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
+# Import für DeepSeek-AI
+try:
+    import deepseek
+    DEEPSEEK_AVAILABLE = True
+except ImportError:
+    DEEPSEEK_AVAILABLE = False
+    print("DeepSeek-AI nicht verfügbar. Bitte installieren Sie es mit: pip install deepseek-ai")
+
+# Offline-Modell-Integration
+@app.route('/offline_model_request', methods=['POST'])
+def offline_model_request():
+    if not DEEPSEEK_AVAILABLE:
+        return jsonify({
+            "success": False,
+            "error": "DeepSeek-Modell nicht installiert. Bitte kontaktieren Sie den Administrator."
+        })
+        
+    data = request.get_json()
+    message = data.get('message', '')
+    model_name = data.get('model', 'deepseek-chat')
+    
+    try:
+        # DeepSeek-Modell initialisieren und Antwort generieren
+        if model_name == 'deepseek-coder':
+            model = deepseek.CodeModel()
+        else:
+            model = deepseek.ChatModel()
+            
+        response = model.generate(message, max_tokens=1024)
+        
+        return jsonify({
+            "success": True,
+            "response": response
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Fehler beim Offline-Modell: {str(e)}"
+        })

@@ -161,7 +161,9 @@ document.addEventListener('DOMContentLoaded', function() {
             'gpt-3.5-turbo', 
             'gemini-pro', 
             'llama2-70b', 
-            'pi'
+            'pi',
+            'deepseek-chat',
+            'deepseek-coder'
         ];
         return freeModels.includes(model);
     }
@@ -172,7 +174,9 @@ document.addEventListener('DOMContentLoaded', function() {
         'claude-instant': 'https://api.anthropic.com/v1/complete',
         'gpt-3.5-turbo': 'https://api.openai.com/v1/chat/completions',
         'gemini-pro': 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
-        'pi': 'https://api.inflection.ai/v1/chat/completions'
+        'pi': 'https://api.inflection.ai/v1/chat/completions',
+        'deepseek-chat': 'https://api.deepseek.com/v1/chat/completions',
+        'deepseek-coder': 'https://api.deepseek.com/v1/coder/completions'
     };
 
     // Send message function

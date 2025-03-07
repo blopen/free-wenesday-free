@@ -56,6 +56,13 @@ class ModelIframeProxy {
     
     console.log("Sende Anfrage an Web-API über CORS-Proxy:", endpoint);
     
+    // Prüfen, ob die Internetverbindung verfügbar ist
+    if (!navigator.onLine) {
+      console.log("Keine Internetverbindung verfügbar, verwende lokalen Fallback");
+      this.useOfflineFallback(payload, callback);
+      return;
+    }
+    
     fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -95,6 +102,37 @@ class ModelIframeProxy {
     const requestId = `req_${Date.now()}_${this.frameCounter++}`;
     this.responseCallbacks[requestId] = callback;
     
+
+  // Verwende lokales DeepSeek-Modell als Fallback, wenn keine Internetverbindung besteht
+  useOfflineFallback(payload, callback) {
+    console.log("Verwende lokales DeepSeek-Modell als Fallback");
+    
+    // Versuche, eine Server-Anfrage für das lokale DeepSeek-Modell zu senden
+    fetch('/offline_model_request', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        message: payload.message || payload.prompt || 
+                 (payload.messages ? JSON.stringify(payload.messages) : "Keine Nachricht")
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        callback(data.response);
+      } else {
+        callback(`Offline-Modell-Fehler: ${data.error}. Versuche es später erneut.`);
+      }
+    })
+    .catch(error => {
+      console.error("Fehler bei der Offline-Modell-Anfrage:", error);
+      callback("Lokales Modell nicht verfügbar. Bitte überprüfen Sie Ihre Verbindung oder versuchen Sie es später erneut.");
+    });
+  }
+
     console.log(`Erstelle iframe für ${modelType}-Anfrage mit ID: ${requestId}`);
     
     // iframe erstellen und zur Seite hinzufügen
@@ -123,6 +161,12 @@ class ModelIframeProxy {
         break;
       case 'llama2-70b':
         iframeUrl = `https://api-proxy.llama2.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
+        break;
+      case 'deepseek-chat':
+        iframeUrl = `https://api-proxy.deepseek.service/chat?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
+        break;
+      case 'deepseek-coder':
+        iframeUrl = `https://api-proxy.deepseek.service/coder?requestId=${requestId}&prompt=${encodeURIComponent(prompt)}`;
         break;
       default:
         console.warn(`Keine bekannte Proxy-URL für Modell ${modelType}`);

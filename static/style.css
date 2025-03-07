@@ -182,6 +182,13 @@ header h1 {
 
 .message-user .message-content {
     background-color: #2196F3;
+
+/* Offline-Badge-Stil */
+.model-badge.offline {
+    background-color: #3a86ff;
+    margin-left: 4px;
+}
+
     color: white;
     border-bottom-right-radius: 4px;
 }
