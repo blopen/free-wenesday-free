@@ -36,7 +36,12 @@ def index():
     # API-Schlüssel aus der Session holen oder leere Dictionaries zurückgeben
     api_keys = session.get('api_keys', {})
     active_model = session.get('active_model', 'claude-free')  # Claude-free als Standard
-    return render_template('index.html', models=MODELS, api_keys=api_keys, active_model=active_model)
+    
+    # Prüfen, ob der Benutzer Admin-Rechte hat
+    user_id = session.get('user_id') or request.headers.get('X-Replit-User-Id')
+    is_admin_user = admin.is_admin(user_id) if user_id else False
+    
+    return render_template('index.html', models=MODELS, api_keys=api_keys, active_model=active_model, is_admin=is_admin_user)
 
 @app.route('/save_api_key', methods=['POST'])
 def save_api_key():

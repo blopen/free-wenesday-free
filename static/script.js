@@ -8,6 +8,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chat-messages');
     const messageInput = document.getElementById('message-input');
     const sendMessageBtn = document.getElementById('send-message');
+    const adminLoginBtn = document.getElementById('admin-login-btn');
+    
+    // Admin Login Funktionalität
+    if (adminLoginBtn) {
+        adminLoginBtn.addEventListener('click', function() {
+            // Simuliere Admin-Login
+            fetch('/admin/login_as_admin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addSystemMessage('Als Admin angemeldet! Sie werden zur Admin-Seite weitergeleitet...');
+                    setTimeout(() => {
+                        window.location.href = '/admin';
+                    }, 1500);
+                } else {
+                    addSystemMessage(`Fehler beim Login: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Fehler:', error);
+                addSystemMessage('Fehler bei der Kommunikation mit dem Server.');
+            });
+        });
+    }
     
     // Current model and chat state
     let activeModel = document.querySelector('.model-item.active')?.dataset.model || 'claude-free';

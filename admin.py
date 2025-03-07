@@ -111,9 +111,30 @@ def get_all_users():
 
 # Admin-Routen für die Flask-Anwendung
 def register_admin_routes(app):
+    @app.route('/admin/login_as_admin', methods=['POST'])
+    def login_as_admin():
+        # Dummy-Admin-ID erstellen und im Session-Objekt speichern
+        dummy_admin_id = "admin_user_12345"
+        session['user_id'] = dummy_admin_id
+        
+        # Prüfen, ob der Admin bereits in der Berechtigungsliste existiert
+        permissions = load_permissions()
+        if dummy_admin_id not in permissions["users"]:
+            # Admin-Benutzer mit allen Rechten erstellen
+            permissions["users"][dummy_admin_id] = {
+                "free_models": permissions["default"]["free_models"].copy(),
+                "premium_models": permissions["default"]["premium_models"].copy(),
+                "has_premium": True,
+                "is_admin": True
+            }
+            save_permissions(permissions)
+        
+        return jsonify({"success": True})
+    
     @app.route('/admin')
     def admin_dashboard():
-        user_id = request.headers.get('X-Replit-User-Id')
+        # Holen Sie die User-ID aus der Session (falls verfügbar) oder aus den Headers
+        user_id = session.get('user_id') or request.headers.get('X-Replit-User-Id')
         if not user_id or not is_admin(user_id):
             return redirect(url_for('index'))
         
@@ -126,7 +147,7 @@ def register_admin_routes(app):
             users=users,
             default_models=default_models,
             user_id=user_id,
-            user_name=request.headers.get('X-Replit-User-Name', '')
+            user_name=session.get('user_name', 'Admin')
         )
     
     @app.route('/admin/user/<user_id>', methods=['GET'])
