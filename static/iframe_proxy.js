@@ -1,13 +1,19 @@
 
 // iframe-Proxy für freie KI-Modell-Antworten
-if (typeof window.ModelIframeProxy === 'undefined') {
+// Prüfen, ob eine vorherige Definition vorhanden ist
+window.ModelIframeProxy = window.ModelIframeProxy || (function() {
   class ModelIframeProxy {
     constructor() {
+      if (window._modelProxyInstance) {
+        return window._modelProxyInstance;
+      }
+      
       this.activeFrames = {};
       this.responseCallbacks = {};
       this.frameCounter = 0;
       this.initMessageListener();
       console.log("ModelIframeProxy initialisiert");
+      window._modelProxyInstance = this;
     }
     
     initMessageListener() {
@@ -52,7 +58,15 @@ if (typeof window.ModelIframeProxy === 'undefined') {
     
     // Direkte Web-API-Anfrage mit CORS-Proxy
     makeProxyRequest(endpoint, payload, callback) {
-      const corsProxyUrl = 'https://corsproxy.io/?';
+      // Wechselnde CORS Proxies für bessere Verfügbarkeit
+      const corsProxies = [
+        'https://corsproxy.io/?',
+        'https://cors-anywhere.herokuapp.com/',
+        'https://api.allorigins.win/raw?url='
+      ];
+      
+      // Zufälligen Proxy auswählen
+      const corsProxyUrl = corsProxies[Math.floor(Math.random() * corsProxies.length)];
       const apiUrl = corsProxyUrl + encodeURIComponent(endpoint);
       
       console.log("Sende Anfrage an Web-API über CORS-Proxy:", endpoint);
@@ -64,13 +78,19 @@ if (typeof window.ModelIframeProxy === 'undefined') {
         return;
       }
       
+      // Timeout für die Fetch-Anfrage
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 Sekunden Timeout
+      
       fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
+          'Origin': window.location.origin
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller.signal
       })
       .then(response => {
         if (!response.ok) {
@@ -187,20 +207,23 @@ if (typeof window.ModelIframeProxy === 'undefined') {
           callback(`Keine Antwort von ${modelType} erhalten (Timeout). Versuche direkte Server-Anfrage...`);
           this.cleanupFrame(requestId);
         }
-      }, 15000); // 15 Sekunden Timeout
+      }, 10000); // 10 Sekunden Timeout (reduziert von 15)
     }
     
     // iframe und Callback aufräumen
     cleanupFrame(requestId) {
       if (this.activeFrames[requestId]) {
-        console.log(`Entferne iframe für Anfrage ${requestId}`);
-        document.body.removeChild(this.activeFrames[requestId]);
+        try {
+          console.log(`Entferne iframe für Anfrage ${requestId}`);
+          document.body.removeChild(this.activeFrames[requestId]);
+        } catch (e) {
+          console.warn(`Fehler beim Entfernen des iframe für ${requestId}:`, e);
+        }
         delete this.activeFrames[requestId];
       }
       delete this.responseCallbacks[requestId];
     }
   }
 
-  // Stelle sicher, dass diese Klasse global verfügbar ist
-  window.ModelIframeProxy = ModelIframeProxy;
-}
+  return ModelIframeProxy;
+})();

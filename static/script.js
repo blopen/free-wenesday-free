@@ -142,11 +142,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Wenn der Proxy noch nicht geladen ist, warten wir kurz und laden ihn
+            // Wenn der Proxy noch nicht geladen ist, laden wir ihn asynchron
             const script = document.createElement('script');
-            script.src = '/static/iframe_proxy.js';
+            script.src = '/static/iframe_proxy.js?v=' + Date.now(); // Cache-Busting
             script.onload = () => {
-                resolve();
+                setTimeout(() => resolve(), 100); // Kurze Verzögerung für Skriptinitialisierung
             };
             script.onerror = () => {
                 console.error("Konnte iframe_proxy.js nicht laden");
@@ -159,12 +159,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialisieren des Proxys nach der Sicherstellung, dass er geladen ist
     ensureProxyLoaded().then(() => {
         try {
-            // Prüfen, ob bereits eine Instanz existiert
-            if (!window.proxyInstance && typeof window.ModelIframeProxy !== 'undefined') {
-                window.proxyInstance = new ModelIframeProxy();
-                console.log("Neue ModelIframeProxy-Instanz erstellt");
+            // Die neue Implementierung sorgt selbst für Singleton-Verhalten
+            if (typeof window.ModelIframeProxy !== 'undefined') {
+                iframeProxy = new window.ModelIframeProxy();
+                console.log("ModelIframeProxy-Instanz bereit");
+            } else {
+                console.warn("ModelIframeProxy nicht verfügbar, verwende Fallback");
+                iframeProxy = createFallbackProxy();
             }
-            iframeProxy = window.proxyInstance || createFallbackProxy();
         } catch (e) {
             console.error("Fehler beim Erstellen des ModelIframeProxy:", e);
             iframeProxy = createFallbackProxy();
@@ -254,8 +256,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Maximale Versuche und Versuchszähler
+    let proxyAttemptCounter = 0;
+    const MAX_PROXY_ATTEMPTS = 2;
+    
     // Fortsetzung der Nachrichtenverarbeitung mit dem Proxy
     function continueWithProxy(message) {
+        // Prüfen, ob zu viele Versuche gemacht wurden
+        if (proxyAttemptCounter >= MAX_PROXY_ATTEMPTS) {
+            addSystemMessage("Web-Proxy nach mehreren Versuchen fehlgeschlagen, verwende direkt die Server-API...");
+            sendMessageToServer(message);
+            proxyAttemptCounter = 0; // Zurücksetzen für nächste Nachricht
+            return;
+        }
+        
+        proxyAttemptCounter++;
+        
         // Bereite Payload für die API-Anfrage vor
         let payload = {};
         const endpoint = publicEndpoints[activeModel];
@@ -265,32 +281,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 model: activeModel,
                 prompt: `\n\nHuman: ${message}\n\nAssistant:`,
                 max_tokens_to_sample: 1000,
-                temperature: 0.7
+                temperature: 0.7,
+                stream: false // Streaming deaktivieren für bessere Stabilität
             };
         } else if (activeModel.includes('gpt')) {
             payload = {
                 model: activeModel,
                 messages: [{ role: "user", content: message }],
                 max_tokens: 1000,
-                temperature: 0.7
+                temperature: 0.7,
+                stream: false
             };
         } else {
             // Generisches Format für andere Modelle
             payload = {
                 model: activeModel,
                 message: message,
-                max_tokens: 1000
+                max_tokens: 1000,
+                stream: false
             };
         }
         
+        // Timeout für den gesamten Proxy-Versuch
+        const proxyTimeout = setTimeout(() => {
+            // Wenn dieser Timeout ausgelöst wird, wurde die Antwort nicht rechtzeitig empfangen
+            if (isProcessing) {
+                handleProxyResponse(`Timeout beim Warten auf Antwort vom ${activeModel}-Proxy.`);
+            }
+        }, 12000); // 12 Sekunden Gesamttimeout
+        
         // Versuche direkte Web-API-Anfrage über CORS-Proxy
         if (endpoint) {
-            addSystemMessage(`Versuche direkte Anfrage an ${activeModel} über Web-Proxy...`);
-            iframeProxy.makeProxyRequest(endpoint, payload, handleProxyResponse);
+            addSystemMessage(`Versuche direkte Anfrage an ${activeModel} über Web-Proxy (Versuch ${proxyAttemptCounter})...`);
+            iframeProxy.makeProxyRequest(endpoint, payload, (response) => {
+                clearTimeout(proxyTimeout);
+                handleProxyResponse(response);
+            });
         } else {
             // Fallback auf iframe-Methode, wenn kein Endpunkt konfiguriert ist
-            addSystemMessage(`Verwende iframe-Proxy für ${activeModel}...`);
-            iframeProxy.requestModelResponse(activeModel, message, handleProxyResponse);
+            addSystemMessage(`Verwende iframe-Proxy für ${activeModel} (Versuch ${proxyAttemptCounter})...`);
+            iframeProxy.requestModelResponse(activeModel, message, (response) => {
+                clearTimeout(proxyTimeout);
+                handleProxyResponse(response);
+            });
         }
     }
     
@@ -299,14 +332,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hide typing indicator
         hideTypingIndicator();
         
-        if (response.includes("Fehler") || response.includes("Timeout") || response.includes("simulierte Antwort")) {
-            // Wenn der Proxy fehlschlägt, Fallback auf Server-Anfrage
-            addSystemMessage("Web-Proxy fehlgeschlagen, verwende Server-API...");
-            sendMessageToServer(messageInput.value.trim() || getLastUserMessage());
+        if (response.includes("Fehler") || response.includes("Timeout") || response.includes("keine Antwort")) {
+            // Bei Proxy-Fehler: entweder noch einmal versuchen oder an Server weiterleiten
+            if (proxyAttemptCounter < MAX_PROXY_ATTEMPTS) {
+                addSystemMessage(`Web-Proxy fehlgeschlagen, versuche alternativen Proxy (Versuch ${proxyAttemptCounter + 1})...`);
+                continueWithProxy(messageInput.value.trim() || getLastUserMessage());
+            } else {
+                addSystemMessage("Web-Proxy nach mehreren Versuchen fehlgeschlagen, verwende Server-API...");
+                sendMessageToServer(messageInput.value.trim() || getLastUserMessage());
+                proxyAttemptCounter = 0; // Zurücksetzen für nächste Nachricht
+            }
         } else {
             // Display bot response from proxy
             addMessage(response, 'bot');
             isProcessing = false;
+            proxyAttemptCounter = 0; // Erfolgreicher Versuch - Counter zurücksetzen
         }
     }
     
