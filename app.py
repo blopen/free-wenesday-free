@@ -3,6 +3,7 @@ import requests
 from flask import Flask, render_template, request, jsonify, session
 from flask_session import Session
 import admin  # Import unseres Admin-Moduls
+from app_config import MODEL_PROXY_URLS, FREE_MODEL_RATE_LIMITS  # Import der Konfiguration
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(24)
