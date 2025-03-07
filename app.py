@@ -7,6 +7,8 @@ from flask_session import Session
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(24)
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_PERMANENT"] = True
+app.config["PERMANENT_SESSION_LIFETIME"] = 3600  # 1 Stunde
 Session(app)
 
 # Verfügbare KI-Modelle
@@ -65,14 +67,94 @@ def chat():
             "error": f"Kein API-Schlüssel für {service} gefunden. Bitte fügen Sie einen Schlüssel hinzu, um Premium-Modelle zu verwenden."
         })
     
-    # Hier würde die eigentliche API-Abfrage stattfinden
-    # Dies ist ein Beispiel - die tatsächliche Implementierung hängt von den verwendeten APIs ab
-    response = "Dies ist eine Beispielantwort vom Modell " + model
+    # Chatverlauf aus der Session abrufen oder neu erstellen
+    chat_history = session.get('chat_history', [])
     
-    return jsonify({
-        "success": True,
-        "response": response
-    })
+    # Benutzeranfrage zum Chatverlauf hinzufügen
+    chat_history.append({"role": "user", "content": message})
+    
+    try:
+        # Verschiedene API-Aufrufe basierend auf dem Modell
+        if service == "openai":
+            if api_key:
+                # Mit API-Key
+                headers = {
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": model,
+                    "messages": chat_history
+                }
+                api_response = requests.post("https://api.openai.com/v1/chat/completions", 
+                                           headers=headers, 
+                                           json=payload)
+                
+                if api_response.status_code == 200:
+                    response_data = api_response.json()
+                    response = response_data['choices'][0]['message']['content']
+                else:
+                    return jsonify({
+                        "success": False,
+                        "error": f"API-Fehler: {api_response.text}"
+                    })
+            else:
+                # Freie Version (simuliert öffentliche API)
+                response = f"Dies ist eine simulierte Antwort vom freien {model}-Modell: Ich antworte auf '{message}'"
+        
+        elif service == "anthropic":
+            # Implementierung für Claude-Modelle
+            if api_key:
+                headers = {
+                    "x-api-key": api_key,
+                    "Content-Type": "application/json"
+                }
+                
+                # Konvertiere Chat-History in das Claude-Format
+                claude_messages = "\n\n".join([f"{msg['role']}: {msg['content']}" for msg in chat_history])
+                
+                payload = {
+                    "prompt": claude_messages + "\n\nassistant:",
+                    "model": model,
+                    "max_tokens_to_sample": 500
+                }
+                
+                api_response = requests.post("https://api.anthropic.com/v1/complete", 
+                                           headers=headers, 
+                                           json=payload)
+                
+                if api_response.status_code == 200:
+                    response_data = api_response.json()
+                    response = response_data['completion']
+                else:
+                    return jsonify({
+                        "success": False,
+                        "error": f"API-Fehler: {api_response.text}"
+                    })
+            else:
+                # Freie Version (simuliert)
+                response = f"Dies ist eine simulierte Antwort vom freien {model}-Modell: Ich antworte auf '{message}'"
+        
+        else:
+            # Für andere Modelle (simuliert)
+            response = f"Dies ist eine simulierte Antwort vom Modell {model}: Ich antworte auf '{message}'"
+        
+        # Antwort zum Chatverlauf hinzufügen
+        chat_history.append({"role": "assistant", "content": response})
+        
+        # Chatverlauf in der Session speichern
+        session['chat_history'] = chat_history
+        
+        return jsonify({
+            "success": True,
+            "response": response
+        })
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Fehler bei der Verarbeitung: {str(e)}"
+        })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)

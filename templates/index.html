@@ -4,67 +4,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wensday KI-Interface</title>
+    <title>KI-Chat-Interface</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Wensday KI-Interface</h1>
-            <div class="model-selector">
-                <h3>Aktives Modell: <span id="active-model">{{ active_model }}</span></h3>
-                <div class="model-list">
-                    {% for model_name, model_info in models.items() %}
-                    <div class="model-item {% if model_name == active_model %}active{% endif %}" data-model="{{ model_name }}">
-                        <span class="model-name">{{ model_name }}</span>
-                        <span class="model-service">({{ model_info.service }})</span>
-                        <span class="model-status">{{ "Frei" if model_info.free else "Premium" }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
+            <h1>KI-Chat-Interface</h1>
         </header>
         
-        <div class="api-keys-section">
-            <h2>API-Schlüssel</h2>
-            <div class="api-keys-form">
-                <div class="api-key-input">
-                    <label for="openai-key">OpenAI API-Schlüssel:</label>
-                    <input type="password" id="openai-key" value="{{ api_keys.get('openai', '') }}">
-                    <button class="save-key" data-service="openai">Speichern</button>
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="model-selection">
+                    <h3>KI-Modell auswählen</h3>
+                    <div class="model-list">
+                        {% for model_name, model_info in models.items() %}
+                        <div class="model-item {% if model_name == active_model %}active{% endif %}" data-model="{{ model_name }}">
+                            <div class="model-name">{{ model_name }}</div>
+                            <div class="model-service">{{ model_info.service }}</div>
+                            <div class="model-status">
+                                {% if model_info.free %}
+                                <span class="free-badge">Frei</span>
+                                {% else %}
+                                <span class="premium-badge">Premium</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
-                <div class="api-key-input">
-                    <label for="anthropic-key">Anthropic API-Schlüssel:</label>
-                    <input type="password" id="anthropic-key" value="{{ api_keys.get('anthropic', '') }}">
-                    <button class="save-key" data-service="anthropic">Speichern</button>
-                </div>
-                <div class="api-key-input">
-                    <label for="google-key">Google API-Schlüssel:</label>
-                    <input type="password" id="google-key" value="{{ api_keys.get('google', '') }}">
-                    <button class="save-key" data-service="google">Speichern</button>
-                </div>
-                <div class="api-key-input">
-                    <label for="meta-key">Meta API-Schlüssel:</label>
-                    <input type="password" id="meta-key" value="{{ api_keys.get('meta', '') }}">
-                    <button class="save-key" data-service="meta">Speichern</button>
-                </div>
-                <div class="api-key-input">
-                    <label for="inflection-key">Inflection API-Schlüssel:</label>
-                    <input type="password" id="inflection-key" value="{{ api_keys.get('inflection', '') }}">
-                    <button class="save-key" data-service="inflection">Speichern</button>
+                
+                <div class="api-keys">
+                    <h3>API-Schlüssel</h3>
+                    <div class="api-key-form">
+                        <select id="api-service">
+                            <option value="openai">OpenAI</option>
+                            <option value="anthropic">Anthropic</option>
+                            <option value="google">Google</option>
+                            <option value="meta">Meta</option>
+                            <option value="inflection">Inflection</option>
+                        </select>
+                        <input type="password" id="api-key-input" placeholder="API-Schlüssel eingeben">
+                        <button id="save-api-key">Speichern</button>
+                    </div>
+                    <div class="saved-api-keys">
+                        <h4>Gespeicherte Schlüssel:</h4>
+                        <ul>
+                            {% for service, key in api_keys.items() %}
+                            <li>{{ service }}: ********</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="chat-container">
-            <div id="chat-messages"></div>
-            <div class="chat-input">
-                <textarea id="user-message" placeholder="Ihre Nachricht hier eingeben..."></textarea>
-                <button id="send-button">Senden</button>
+            
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages">
+                    <!-- Chat-Nachrichten werden hier angezeigt -->
+                </div>
+                
+                <div class="chat-input">
+                    <textarea id="message-input" placeholder="Nachricht eingeben..."></textarea>
+                    <button id="send-message">Senden</button>
+                </div>
             </div>
         </div>
     </div>
-
+    
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
