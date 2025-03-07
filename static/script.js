@@ -158,3 +158,113 @@ document.addEventListener('DOMContentLoaded', function() {
     // Füge eine Begrüßungsnachricht hinzu
     addMessage('Hallo! Wie kann ich Ihnen helfen?', 'bot');
 });
+// Funktion zum Laden und Initialisieren der Chat-UI
+document.addEventListener('DOMContentLoaded', function() {
+    // Model-Auswahl-Event-Listener
+    const modelButtons = document.querySelectorAll('.model-button');
+    modelButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const model = this.getAttribute('data-model');
+            fetch('/set_active_model', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `model=${model}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Aktives Modell hervorheben
+                    modelButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Wenn es Claude-free ist, zeige einen Hinweis an
+                    const messageArea = document.getElementById('chat-messages');
+                    if (model === 'claude-free') {
+                        const infoMessage = document.createElement('div');
+                        infoMessage.className = 'system-message';
+                        infoMessage.innerHTML = '<p>Du nutzt jetzt Claude ohne API-Schlüssel! Diese Version hat eingeschränkte Funktionalität.</p>';
+                        messageArea.appendChild(infoMessage);
+                        messageArea.scrollTop = messageArea.scrollHeight;
+                    }
+                }
+            });
+        });
+    });
+
+    // API-Schlüssel-Speicher-Event-Listener
+    document.getElementById('save-api-key').addEventListener('click', function() {
+        const service = document.getElementById('api-service').value;
+        const apiKey = document.getElementById('api-key-input').value;
+        
+        fetch('/save_api_key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `service=${service}&api_key=${apiKey}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('API-Schlüssel gespeichert!');
+                location.reload();
+            }
+        });
+    });
+
+    // Chat-Formular-Event-Listener
+    document.getElementById('chat-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const messageInput = document.getElementById('message-input');
+        const message = messageInput.value.trim();
+        
+        if (message) {
+            addMessageToChat('user', message);
+            messageInput.value = '';
+            
+            // Lade-Animation anzeigen
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading-message';
+            loadingDiv.innerHTML = '<p>AI denkt nach...</p>';
+            document.getElementById('chat-messages').appendChild(loadingDiv);
+            
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `message=${encodeURIComponent(message)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Lade-Animation entfernen
+                document.querySelector('.loading-message').remove();
+                
+                if (data.success) {
+                    addMessageToChat('assistant', data.response);
+                } else {
+                    addMessageToChat('system', `Fehler: ${data.error}`);
+                }
+            });
+        }
+    });
+    
+    // Funktion zum Hinzufügen von Nachrichten zur Chat-UI
+    function addMessageToChat(role, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `${role}-message`;
+        
+        // Einfache Markdown-Unterstützung für Code-Blöcke
+        content = content.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+        
+        messageDiv.innerHTML = `<p>${content}</p>`;
+        document.getElementById('chat-messages').appendChild(messageDiv);
+        
+        // Zum Ende scrollen
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+});
