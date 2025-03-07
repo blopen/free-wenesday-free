@@ -41,6 +41,16 @@
         }
     </style>
 </head>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI-Chat-Interface</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Laden des iframe_proxy.js vor dem Hauptscript -->
+    <script src="/static/iframe_proxy.js"></script>
+</head>
 <body>
     <div class="container">
         <header>
@@ -71,6 +81,24 @@
 
                 <div class="api-keys">
                     <h3>API-Schlüssel</h3>
+                    <!-- Rest der API-Schlüssel-Sektion hier -->
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages"></div>
+                <div class="chat-input">
+                    <textarea id="message-input" placeholder="Nachricht eingeben..."></textarea>
+                    <button id="send-message">Senden</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Script zum Schluss laden -->
+    <script src="/static/script.js"></script>
+</body>
+</html>3>
                     <div class="api-key-form">
                         <select id="api-service">
                             <option value="openai">OpenAI</option>

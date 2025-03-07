@@ -132,23 +132,54 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Erstellen der iframe-Proxy-Instanz und stellen sicher, dass es nur eine gibt
-    let iframeProxy; 
-    try {
-        // Prüfen, ob bereits eine Instanz existiert
-        if (!window.proxyInstance) {
-            window.proxyInstance = new ModelIframeProxy();
-            console.log("Neue ModelIframeProxy-Instanz erstellt");
+    let iframeProxy;
+    
+    // Stellen sicher, dass das Proxy-Script geladen wurde
+    function ensureProxyLoaded() {
+        return new Promise((resolve) => {
+            if (typeof window.ModelIframeProxy !== 'undefined') {
+                resolve();
+                return;
+            }
+            
+            // Wenn der Proxy noch nicht geladen ist, warten wir kurz und laden ihn
+            const script = document.createElement('script');
+            script.src = '/static/iframe_proxy.js';
+            script.onload = () => {
+                resolve();
+            };
+            script.onerror = () => {
+                console.error("Konnte iframe_proxy.js nicht laden");
+                resolve(); // Trotzdem fortfahren
+            };
+            document.head.appendChild(script);
+        });
+    }
+    
+    // Initialisieren des Proxys nach der Sicherstellung, dass er geladen ist
+    ensureProxyLoaded().then(() => {
+        try {
+            // Prüfen, ob bereits eine Instanz existiert
+            if (!window.proxyInstance && typeof window.ModelIframeProxy !== 'undefined') {
+                window.proxyInstance = new ModelIframeProxy();
+                console.log("Neue ModelIframeProxy-Instanz erstellt");
+            }
+            iframeProxy = window.proxyInstance || createFallbackProxy();
+        } catch (e) {
+            console.error("Fehler beim Erstellen des ModelIframeProxy:", e);
+            iframeProxy = createFallbackProxy();
         }
-        iframeProxy = window.proxyInstance;
-    } catch (e) {
-        console.error("Fehler beim Erstellen des ModelIframeProxy:", e);
-        // Fallback-Objekt erstellen, falls die Klasse nicht verfügbar ist
-        iframeProxy = {
+    });
+    
+    // Fallback-Proxy erstellen, falls etwas schiefgeht
+    function createFallbackProxy() {
+        return {
             requestModelResponse: function(model, message, callback) {
-                callback("Proxy-Modul nicht verfügbar. Versuche Server-Anfrage...");
+                sendMessageToServer(message);
             },
             makeProxyRequest: function(endpoint, payload, callback) {
-                callback("Proxy-Modul nicht verfügbar. Versuche Server-Anfrage...");
+                sendMessageToServer(payload.message || payload.prompt || 
+                    (payload.messages ? payload.messages[0].content : "Keine Nachricht"));
             }
         };
     }
@@ -201,45 +232,65 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isFreeModel(activeModel)) {
             console.log(`Verwende Web-Proxy für ${activeModel}`);
             
-            // Bereite Payload für die API-Anfrage vor
-            let payload = {};
-            const endpoint = publicEndpoints[activeModel];
-            
-            if (activeModel.includes('claude')) {
-                payload = {
-                    model: activeModel,
-                    prompt: `\n\nHuman: ${message}\n\nAssistant:`,
-                    max_tokens_to_sample: 1000,
-                    temperature: 0.7
-                };
-            } else if (activeModel.includes('gpt')) {
-                payload = {
-                    model: activeModel,
-                    messages: [{ role: "user", content: message }],
-                    max_tokens: 1000,
-                    temperature: 0.7
-                };
-            } else {
-                // Generisches Format für andere Modelle
-                payload = {
-                    model: activeModel,
-                    message: message,
-                    max_tokens: 1000
-                };
+            // Stellen sicher, dass der Proxy verfügbar ist
+            if (!iframeProxy) {
+                console.log("Proxy noch nicht verfügbar, warte kurz...");
+                setTimeout(() => {
+                    if (window.proxyInstance) {
+                        iframeProxy = window.proxyInstance;
+                        continueWithProxy(message);
+                    } else {
+                        addSystemMessage("Proxy-Modul nicht verfügbar. Nutze Server-API direkt.");
+                        sendMessageToServer(message);
+                    }
+                }, 500);
+                return;
             }
             
-            // Versuche direkte Web-API-Anfrage über CORS-Proxy
-            if (endpoint) {
-                addSystemMessage(`Versuche direkte Anfrage an ${activeModel} über Web-Proxy...`);
-                iframeProxy.makeProxyRequest(endpoint, payload, handleProxyResponse);
-            } else {
-                // Fallback auf iframe-Methode, wenn kein Endpunkt konfiguriert ist
-                addSystemMessage(`Verwende iframe-Proxy für ${activeModel}...`);
-                iframeProxy.requestModelResponse(activeModel, message, handleProxyResponse);
-            }
+            continueWithProxy(message);
         } else {
             // Premium-Modelle verwenden weiterhin die Server-API
             sendMessageToServer(message);
+        }
+    }
+    
+    // Fortsetzung der Nachrichtenverarbeitung mit dem Proxy
+    function continueWithProxy(message) {
+        // Bereite Payload für die API-Anfrage vor
+        let payload = {};
+        const endpoint = publicEndpoints[activeModel];
+        
+        if (activeModel.includes('claude')) {
+            payload = {
+                model: activeModel,
+                prompt: `\n\nHuman: ${message}\n\nAssistant:`,
+                max_tokens_to_sample: 1000,
+                temperature: 0.7
+            };
+        } else if (activeModel.includes('gpt')) {
+            payload = {
+                model: activeModel,
+                messages: [{ role: "user", content: message }],
+                max_tokens: 1000,
+                temperature: 0.7
+            };
+        } else {
+            // Generisches Format für andere Modelle
+            payload = {
+                model: activeModel,
+                message: message,
+                max_tokens: 1000
+            };
+        }
+        
+        // Versuche direkte Web-API-Anfrage über CORS-Proxy
+        if (endpoint) {
+            addSystemMessage(`Versuche direkte Anfrage an ${activeModel} über Web-Proxy...`);
+            iframeProxy.makeProxyRequest(endpoint, payload, handleProxyResponse);
+        } else {
+            // Fallback auf iframe-Methode, wenn kein Endpunkt konfiguriert ist
+            addSystemMessage(`Verwende iframe-Proxy für ${activeModel}...`);
+            iframeProxy.requestModelResponse(activeModel, message, handleProxyResponse);
         }
     }
     
