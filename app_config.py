@@ -43,4 +43,4 @@ FREE_MODEL_MAX_TOKENS = {
 }
 
 # Fallback-Modell, wenn keine Internetverbindung besteht
-OFFLINE_FALLBACK_MODEL = "deepseek-chat"-chat"
+OFFLINE_FALLBACK_MODEL = "deepseek-chat"
