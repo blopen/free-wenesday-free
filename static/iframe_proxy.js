@@ -25,11 +25,29 @@ window.ModelIframeProxy = window.ModelIframeProxy || (function() {
       // Sicherheits-Check für Origin
       if (this.isTrustedOrigin(event.origin)) {
         try {
-          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          // Verbesserte Fehlerbehandlung bei der Datenverarbeitung
+          let data;
+          if (typeof event.data === 'string') {
+            try {
+              data = JSON.parse(event.data);
+            } catch (parseError) {
+              console.warn("Konnte die Nachricht nicht als JSON parsen:", event.data.substring(0, 100));
+              return; // Nicht-JSON-Nachrichten ignorieren
+            }
+          } else {
+            data = event.data;
+          }
+          
+          // Prüfen ob alle erwarteten Felder vorhanden sind
+          if (!data || typeof data !== 'object') {
+            console.warn("Unerwartetes Nachrichtenformat:", data);
+            return;
+          }
+          
           if (data.type === 'model_response' && data.requestId && this.responseCallbacks[data.requestId]) {
             console.log("Antwort vom iframe erhalten:", data.requestId);
             // Callback mit der Antwort aufrufen
-            this.responseCallbacks[data.requestId](data.response);
+            this.responseCallbacks[data.requestId](data.response || "Keine Antwort erhalten");
             // Callback und iframe aufräumen
             this.cleanupFrame(data.requestId);
           }
@@ -93,6 +111,7 @@ window.ModelIframeProxy = window.ModelIframeProxy || (function() {
         signal: controller.signal
       })
       .then(response => {
+        clearTimeout(timeoutId); // Timeout aufheben
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
