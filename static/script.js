@@ -30,12 +30,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Admin Login Funktionalität
     if (adminLoginBtn) {
         adminLoginBtn.addEventListener('click', function() {
-            // Simuliere Admin-Login
+            // Passwort-Popup anzeigen
+            const password = prompt('Bitte geben Sie das Admin-Passwort ein:');
+            
+            // Wenn Cancel gedrückt wurde oder leeres Passwort
+            if (password === null || password === '') {
+                return;
+            }
+            
+            // Admin-Login mit Passwort
             fetch('/admin/login_as_admin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                body: JSON.stringify({ password: password })
             })
             .then(response => response.json())
             .then(data => {
@@ -45,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         window.location.href = '/admin';
                     }, 1500);
                 } else {
-                    addSystemMessage(`Fehler beim Login: ${data.error}`);
+                    addSystemMessage(`Fehler beim Login: ${data.error || 'Falsches Passwort'}`);
                 }
             })
             .catch(error => {

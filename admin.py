@@ -113,7 +113,13 @@ def get_all_users():
 def register_admin_routes(app):
     @app.route('/admin/login_as_admin', methods=['POST'])
     def login_as_admin():
-        password = request.form.get('password')
+        # Versuche, das Passwort aus JSON-Daten zu bekommen
+        try:
+            data = request.get_json()
+            password = data.get('password') if data else None
+        except:
+            # Fallback auf Formular-Daten, falls kein JSON
+            password = request.form.get('password')
         
         # Check if the password is correct
         if password == "123456789lc":
