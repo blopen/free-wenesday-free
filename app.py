@@ -1,10 +1,14 @@
 import os
 import requests
+import uuid
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_session import Session
+from flask_login import LoginManager, current_user
 import admin  # Import unseres Admin-Moduls
 from app_config import MODEL_PROXY_URLS, FREE_MODEL_RATE_LIMITS  # Import der Konfiguration
 from werkzeug.urls import url_parse  # Use url_parse instead of url_quote
+from models import User
+from auth import auth_bp, init_oauth
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(24)
@@ -12,6 +16,22 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_PERMANENT_LIFETIME"] = 3600  # 1 Stunde
 Session(app)
+
+# Login-Manager initialisieren
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'auth.login'
+login_manager.login_message = 'Bitte melden Sie sich an, um diese Seite zu sehen.'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
+
+# OAuth einrichten
+oauth = init_oauth(app)
+
+# Registriere Blueprints
+app.register_blueprint(auth_bp, url_prefix='/auth')
 
 # Registriere Admin-Routen
 admin.register_admin_routes(app)
@@ -40,8 +60,16 @@ def index():
     active_model = session.get('active_model', 'claude-free')  # Claude-free als Standard
     
     # Prüfen, ob der Benutzer Admin-Rechte hat
-    user_id = session.get('user_id') or request.headers.get('X-Replit-User-Id')
-    is_admin_user = admin.is_admin(user_id) if user_id else False
+    is_admin_user = False
+    
+    if current_user.is_authenticated:
+        is_admin_user = current_user.is_admin
+        # Benutzer-ID aus current_user für Admin-Prüfung verwenden
+        user_id = current_user.id
+    else:
+        # Für nicht angemeldete Benutzer
+        user_id = session.get('user_id') or request.headers.get('X-Replit-User-Id')
+        is_admin_user = admin.is_admin(user_id) if user_id else False
     
     return render_template('index.html', models=MODELS, api_keys=api_keys, active_model=active_model, is_admin=is_admin_user)
 

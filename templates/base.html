@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KI-Chat-Interface{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Laden des iframe_proxy.js vor dem Hauptscript -->
+    <script src="/static/iframe_proxy.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <label class="theme-toggle">
+                <input type="checkbox" id="theme-toggle-checkbox">
+                <span class="slider"></span>
+            </label>
+            <h1>KI-Chat-Interface</h1>
+            <div class="branding">WENSDAY-CLOUD BY LOPEZ.CODES</div>
+            
+            <div class="user-menu">
+                {% if current_user.is_authenticated %}
+                <div class="user-info">
+                    <span>{{ current_user.name }}</span>
+                    <div class="dropdown-menu">
+                        <a href="{{ url_for('auth.profile') }}">Profil</a>
+                        {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}">Abmelden</a>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="login-btn">Anmelden</a>
+                <a href="{{ url_for('auth.register') }}" class="register-btn">Registrieren</a>
+                {% endif %}
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Registrieren</h2>
+    <form method="POST" action="{{ url_for('auth.register') }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.name.label }}
+            {{ form.name(class="form-control") }}
+            {% for error in form.name.errors %}
+            <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+            {% for error in form.email.errors %}
+            <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password(class="form-control") }}
+            {% for error in form.password.errors %}
+            <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.password2.label }}
+            {{ form.password2(class="form-control") }}
+            {% for error in form.password2.errors %}
+            <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+    <div class="social-login">
+        <p>Oder registrieren Sie sich mit:</p>
+        <a href="{{ url_for('auth.google_login') }}" class="btn btn-google">
+            Google
+        </a>
+    </div>
+    <div class="auth-links">
+        <p>Bereits registriert? <a href="{{ url_for('auth.login') }}">Anmelden</a></p>
+    </div>
+</div>
+{% endblock %}

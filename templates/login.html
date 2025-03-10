@@ -1,0 +1,40 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Anmelden</h2>
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+            {% for error in form.email.errors %}
+            <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password(class="form-control") }}
+            {% for error in form.password.errors %}
+            <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-check">
+            {{ form.remember_me(class="form-check-input") }}
+            {{ form.remember_me.label(class="form-check-label") }}
+        </div>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+    <div class="social-login">
+        <a href="{{ url_for('auth.google_login') }}" class="btn btn-google">
+            Mit Google anmelden
+        </a>
+    </div>
+    <div class="auth-links">
+        <p>Noch kein Konto? <a href="{{ url_for('auth.register') }}">Registrieren</a></p>
+    </div>
+</div>
+{% endblock %}

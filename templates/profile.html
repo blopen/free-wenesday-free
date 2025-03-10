@@ -1,0 +1,30 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    <h2>Benutzerprofil</h2>
+    
+    <div class="profile-info">
+        <div class="profile-field">
+            <strong>Name:</strong> {{ current_user.name }}
+        </div>
+        <div class="profile-field">
+            <strong>E-Mail:</strong> {{ current_user.email }}
+        </div>
+        <div class="profile-field">
+            <strong>Mitglied seit:</strong> {{ current_user.created_at.split('T')[0] }}
+        </div>
+        {% if current_user.is_admin %}
+        <div class="profile-field admin-badge">
+            Administrator
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="profile-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Zurück zum Chat</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Abmelden</a>
+    </div>
+</div>
+{% endblock %}
