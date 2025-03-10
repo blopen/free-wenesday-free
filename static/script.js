@@ -8,6 +8,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageInput = document.getElementById('message-input');
     const sendMessageBtn = document.getElementById('send-message');
     const adminLoginBtn = document.getElementById('admin-login-btn');
+    const themeToggle = document.getElementById('theme-toggle-checkbox');
+    
+    // Theme toggle functionality
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        themeToggle.checked = true;
+    }
+    
+    themeToggle.addEventListener('change', function() {
+        if (this.checked) {
+            document.body.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-theme');
+            localStorage.setItem('theme', 'light');
+        }
+    });
 
     // Admin Login Funktionalität
     if (adminLoginBtn) {
