@@ -492,6 +492,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Scroll chat to bottom
     function scrollToBottom() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        // Stelle sicher, dass das Scroll-Verhalten auch auf Mobilgeräten funktioniert
+        setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 100);
     }
 
     // Initialize chat with welcome message
