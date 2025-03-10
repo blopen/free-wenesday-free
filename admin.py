@@ -113,23 +113,29 @@ def get_all_users():
 def register_admin_routes(app):
     @app.route('/admin/login_as_admin', methods=['POST'])
     def login_as_admin():
-        # Dummy-Admin-ID erstellen und im Session-Objekt speichern
-        dummy_admin_id = "admin_user_12345"
-        session['user_id'] = dummy_admin_id
+        password = request.form.get('password')
         
-        # Prüfen, ob der Admin bereits in der Berechtigungsliste existiert
-        permissions = load_permissions()
-        if dummy_admin_id not in permissions["users"]:
-            # Admin-Benutzer mit allen Rechten erstellen
-            permissions["users"][dummy_admin_id] = {
-                "free_models": permissions["default"]["free_models"].copy(),
-                "premium_models": permissions["default"]["premium_models"].copy(),
-                "has_premium": True,
-                "is_admin": True
-            }
-            save_permissions(permissions)
-        
-        return jsonify({"success": True})
+        # Check if the password is correct
+        if password == "123456789lc":
+            # Dummy-Admin-ID erstellen und im Session-Objekt speichern
+            dummy_admin_id = "admin_user_12345"
+            session['user_id'] = dummy_admin_id
+            
+            # Prüfen, ob der Admin bereits in der Berechtigungsliste existiert
+            permissions = load_permissions()
+            if dummy_admin_id not in permissions["users"]:
+                # Admin-Benutzer mit allen Rechten erstellen
+                permissions["users"][dummy_admin_id] = {
+                    "free_models": permissions["default"]["free_models"].copy(),
+                    "premium_models": permissions["default"]["premium_models"].copy(),
+                    "has_premium": True,
+                    "is_admin": True
+                }
+                save_permissions(permissions)
+            
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": "Falsches Passwort"})
     
     @app.route('/admin')
     def admin_dashboard():

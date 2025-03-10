@@ -4,49 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KI-Chat-Interface</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <meta name="description" content="Ein KI-Chat-Interface mit verschiedenen KI-Modellen">
-    <meta name="theme-color" content="#2196F3">
-    <style>
-        .admin-link {
-            display: inline-block;
-            margin: 10px 0;
-            padding: 8px 15px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        .admin-link:hover {
-            background-color: #2980b9;
-        }
-
-        .admin-login-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 8px 15px;
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .admin-login-btn:hover {
-            background-color: #c0392b;
-        }
-    </style>
-</head>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KI-Chat-Interface</title>
     <link rel="stylesheet" href="/static/style.css">
     <!-- Laden des iframe_proxy.js vor dem Hauptscript -->
     <script src="/static/iframe_proxy.js"></script>
@@ -86,24 +43,6 @@
 
                 <div class="api-keys">
                     <h3>API-Schlüssel</h3>
-                    <!-- Rest der API-Schlüssel-Sektion hier -->
-                </div>
-            </div>
-            
-            <div class="chat-container">
-                <div id="chat-messages" class="chat-messages"></div>
-                <div class="chat-input">
-                    <textarea id="message-input" placeholder="Nachricht eingeben..."></textarea>
-                    <button id="send-message">Senden</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Script zum Schluss laden -->
-    <script src="/static/script.js"></script>
-</body>
-</html>
                     <div class="api-key-form">
                         <select id="api-service">
                             <option value="openai">OpenAI</option>
@@ -144,7 +83,7 @@
         {% endif %}
     </div>
 
-    <script src="{{ url_for('static', filename='iframe_proxy.js') }}"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="/static/iframe_proxy.js"></script>
+    <script src="/static/script.js"></script>
 </body>
 </html>
