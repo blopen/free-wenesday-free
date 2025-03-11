@@ -46,7 +46,7 @@ def login():
             flash(f'Willkommen zurück, {user.name}!')
             
             next_page = request.args.get('next')
-            if not next_page or url_parse(next_page).netloc != '':
+            if not next_page or not next_page.startswith('/'):
                 next_page = url_for('index')
             return redirect(next_page)
         except Exception as e:

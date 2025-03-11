@@ -1,8 +1,6 @@
-
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
-from models import User
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length
 
 class LoginForm(FlaskForm):
     email = StringField('E-Mail', validators=[DataRequired(), Email()])
@@ -11,17 +9,8 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Anmelden')
 
 class RegistrationForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired(), Length(min=2, max=64)])
     email = StringField('E-Mail', validators=[DataRequired(), Email()])
-    password = PasswordField('Passwort', validators=[
-        DataRequired(),
-        Length(min=8, message='Passwort muss mindestens 8 Zeichen lang sein.')
-    ])
-    password2 = PasswordField(
-        'Passwort wiederholen', validators=[DataRequired(), EqualTo('password')])
+    password = PasswordField('Passwort', validators=[DataRequired(), Length(min=6)])
+    password2 = PasswordField('Passwort wiederholen', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Registrieren')
-
-    def validate_email(self, email):
-        user = User.find_by_email(email.data)
-        if user is not None:
-            raise ValidationError('Bitte verwenden Sie eine andere E-Mail-Adresse.')

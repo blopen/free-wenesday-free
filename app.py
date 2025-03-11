@@ -63,9 +63,12 @@ def index():
     is_admin_user = False
     
     if current_user.is_authenticated:
-        is_admin_user = current_user.is_admin
+        is_admin_user = getattr(current_user, 'is_admin', False)
         # Benutzer-ID aus current_user für Admin-Prüfung verwenden
         user_id = current_user.id
+        # Stelle sicher, dass Chat-Funktionen richtig initialisiert sind
+        if 'chat_history' not in session:
+            session['chat_history'] = []
     else:
         # Für nicht angemeldete Benutzer
         user_id = session.get('user_id') or request.headers.get('X-Replit-User-Id')

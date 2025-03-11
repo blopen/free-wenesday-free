@@ -68,6 +68,25 @@ document.addEventListener('DOMContentLoaded', function() {
     let activeModel = document.querySelector('.model-item.active')?.dataset.model || 'claude-free';
     let isProcessing = false;
 
+    // Hilfsfunktion, um DOM-Elemente sicher zu selektieren
+    function safeQuerySelector(selector) {
+        const element = document.querySelector(selector);
+        if (!element) {
+            console.warn(`Element mit Selektor "${selector}" nicht gefunden`);
+            return null;
+        }
+        return element;
+    }
+
+    // API-Key-Speichern-Button sicher abrufen
+    const saveApiKeyBtn = safeQuerySelector('#save-api-key');
+    if (saveApiKeyBtn) {
+        saveApiKeyBtn.addEventListener('click', saveApiKey);
+    }
+
+    // Chat-Nachrichten-Container sicher abrufen
+    const chatMessages = safeQuerySelector('#chat-messages');
+
     // Initialize chat history from session if available
     initializeChat();
 
