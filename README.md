@@ -14,8 +14,6 @@ After you have cloned the repository, you can make changes to the code and files
 
 Dependencies:
 
-The Wenesday web application is built using the following dependencies:
-
 React
 React-Router
 Redux
@@ -25,6 +23,7 @@ TensorFlow
 OpenAI
 Quantum
 GPT-616-Quantinium (alias free-wenesday-free)
+LOPEZ-Modell für emotionale und psychische Gesundheit
 
 License:
 

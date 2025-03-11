@@ -14,6 +14,7 @@ TensorFlow: Used for machine learning and neural networks.
 OpenAI: Used for natural language processing and text generation.
 Quantum: Used for simulation of quantum computers.
 GPT-616-Quantinium: Used for text generation through artificial intelligence.
+LOPEZ-Modell: Framework for emotional and psychological health development.
 
 This project is a web application called "Wenesday" that allows users to create, share, and browse their favorite algorithms. The application is built using React, React-Router, Redux, Material-UI, and Firebase and includes endpoints that enable the creation, updating, and deletion of algorithms. Users can also search for algorithms and filter them by various criteria. The goal of Wenesday is to create a vibrant community of algorithm enthusiasts and foster the exchange of algorithmic ideas.
 
