@@ -8,6 +8,15 @@
             "google_id": null,
             "created_at": "2025-03-10T14:19:05.962207",
             "is_admin": false
+        },
+        "2f49153d-648b-42f7-8b43-7e87fc4d267b": {
+            "id": "2f49153d-648b-42f7-8b43-7e87fc4d267b",
+            "email": "nelson@lopez-be.ch",
+            "name": "blopen",
+            "password_hash": "pbkdf2:sha256:260000$yTzGD7YwNiPBFbSS$f0bf750b61f2c8b4c9f7747f16b5c5c4b1079f0d7a4e0826653cdb71f5a217e6",
+            "google_id": null,
+            "created_at": "2025-03-11T02:09:52.167361",
+            "is_admin": false
         }
     }
 }
