@@ -9,14 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const sendMessageBtn = document.getElementById('send-message');
     const adminLoginBtn = document.getElementById('admin-login-btn');
     const themeToggle = document.getElementById('theme-toggle-checkbox');
-    
+
     // Theme toggle functionality
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
         themeToggle.checked = true;
     }
-    
+
     themeToggle.addEventListener('change', function() {
         if (this.checked) {
             document.body.classList.add('dark-theme');
@@ -32,12 +32,12 @@ document.addEventListener('DOMContentLoaded', function() {
         adminLoginBtn.addEventListener('click', function() {
             // Passwort-Popup anzeigen
             const password = prompt('Bitte geben Sie das Admin-Passwort ein:');
-            
+
             // Wenn Cancel gedrückt wurde oder leeres Passwort
             if (password === null || password === '') {
                 return;
             }
-            
+
             // Admin-Login mit Passwort
             fetch('/admin/login_as_admin', {
                 method: 'POST',
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Erstellen der iframe-Proxy-Instanz und stellen sicher, dass es nur eine gibt
     let iframeProxy;
-    
+
     // Stellen sicher, dass das Proxy-Script geladen wurde
     function ensureProxyLoaded() {
         return new Promise((resolve) => {
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 resolve();
                 return;
             }
-            
+
             // Wenn der Proxy noch nicht geladen ist, laden wir ihn asynchron
             const script = document.createElement('script');
             script.src = '/static/iframe_proxy.js?v=' + Date.now(); // Cache-Busting
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.head.appendChild(script);
         });
     }
-    
+
     // Initialisieren des Proxys nach der Sicherstellung, dass er geladen ist
     ensureProxyLoaded().then(() => {
         try {
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             iframeProxy = createFallbackProxy();
         }
     });
-    
+
     // Fallback-Proxy erstellen, falls etwas schiefgeht
     function createFallbackProxy() {
         return {
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
     }
-    
+
     // Prüfen ob ein Modell kostenlos ist
     function isFreeModel(model) {
         const freeModels = [
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Verwende den verbesserten Web-Proxy für freie Modelle
         if (isFreeModel(activeModel)) {
             console.log(`Verwende Web-Proxy für ${activeModel}`);
-            
+
             // Stellen sicher, dass der Proxy verfügbar ist
             if (!iframeProxy) {
                 console.log("Proxy noch nicht verfügbar, warte kurz...");
@@ -275,18 +275,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 500);
                 return;
             }
-            
+
             continueWithProxy(message);
         } else {
             // Premium-Modelle verwenden weiterhin die Server-API
             sendMessageToServer(message);
         }
     }
-    
+
     // Maximale Versuche und Versuchszähler
     let proxyAttemptCounter = 0;
     const MAX_PROXY_ATTEMPTS = 2;
-    
+
     // Fortsetzung der Nachrichtenverarbeitung mit dem Proxy
     function continueWithProxy(message) {
         // Prüfen, ob zu viele Versuche gemacht wurden
@@ -296,13 +296,13 @@ document.addEventListener('DOMContentLoaded', function() {
             proxyAttemptCounter = 0; // Zurücksetzen für nächste Nachricht
             return;
         }
-        
+
         proxyAttemptCounter++;
-        
+
         // Bereite Payload für die API-Anfrage vor
         let payload = {};
         const endpoint = publicEndpoints[activeModel];
-        
+
         if (activeModel.includes('claude')) {
             payload = {
                 model: activeModel,
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 stream: false
             };
         }
-        
+
         // Timeout für den gesamten Proxy-Versuch
         const proxyTimeout = setTimeout(() => {
             // Wenn dieser Timeout ausgelöst wird, wurde die Antwort nicht rechtzeitig empfangen
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 handleProxyResponse(`Timeout beim Warten auf Antwort vom ${activeModel}-Proxy.`);
             }
         }, 12000); // 12 Sekunden Gesamttimeout
-        
+
         // Versuche direkte Web-API-Anfrage über CORS-Proxy
         if (endpoint) {
             addSystemMessage(`Versuche direkte Anfrage an ${activeModel} über Web-Proxy (Versuch ${proxyAttemptCounter})...`);
@@ -353,12 +353,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    
+
     // Handler für Proxy-Antworten
     function handleProxyResponse(response) {
         // Hide typing indicator
         hideTypingIndicator();
-        
+
         if (response.includes("Fehler") || response.includes("Timeout") || response.includes("keine Antwort")) {
             // Bei Proxy-Fehler: entweder noch einmal versuchen oder an Server weiterleiten
             if (proxyAttemptCounter < MAX_PROXY_ATTEMPTS) {
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
             proxyAttemptCounter = 0; // Erfolgreicher Versuch - Counter zurücksetzen
         }
     }
-    
+
     // Hilfsfunktion, um die letzte Benutzeranfrage zu erhalten
     function getLastUserMessage() {
         const userMessages = chatMessages.querySelectorAll('.message-user .message-content');
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return "";
     }
-    
+
     // Funktion zum Senden der Nachricht an den Server (für Premium-Modelle oder Fallback)
     function sendMessageToServer(message) {
         // AJAX request to send message
@@ -533,5 +533,62 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('offline', function() {
         addSystemMessage('Keine Internetverbindung. Bitte überprüfen Sie Ihre Verbindung.');
+    });
+
+    // API-Schlüssel speichern
+    document.getElementById('save-api-key-btn')?.addEventListener('click', function() {
+        const service = document.getElementById('service-selector').value;
+        const apiKey = document.getElementById('api-key-input').value;
+
+        if (!apiKey) {
+            alert('Bitte geben Sie einen API-Schlüssel ein.');
+            return;
+        }
+
+        fetch('/save_api_key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `service=${encodeURIComponent(service)}&api_key=${encodeURIComponent(apiKey)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Aktualisiere die Liste der gespeicherten Schlüssel
+                const savedKeysList = document.getElementById('saved-keys-list');
+
+                // Prüfe, ob der Schlüssel bereits in der Liste ist
+                let keyExists = false;
+                for (const li of savedKeysList.children) {
+                    if (li.textContent.startsWith(service + ':')) {
+                        keyExists = true;
+                        break;
+                    }
+                }
+
+                if (!keyExists) {
+                    const newKey = document.createElement('li');
+                    newKey.textContent = `${service}: ********`;
+                    savedKeysList.appendChild(newKey);
+                }
+
+                // Eingabefeld zurücksetzen
+                document.getElementById('api-key-input').value = '';
+
+                showToast('API-Schlüssel gespeichert!');
+            } else if (data.error) {
+                showToast(data.error);
+                if (data.error.includes('angemeldet')) {
+                    setTimeout(() => {
+                        window.location.href = '/auth/login';
+                    }, 2000);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Fehler beim Speichern des API-Schlüssels:', error);
+            showToast('Fehler beim Speichern des API-Schlüssels');
+        });
     });
 });

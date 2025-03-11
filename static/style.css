@@ -282,7 +282,7 @@ header h1 {
     .container {
         padding: 5px;
     }
-    
+
     body {
         overflow: hidden;
     }
@@ -291,12 +291,12 @@ header h1 {
         height: calc(100vh - 130px);
         margin-bottom: 0;
     }
-    
+
     .message-content {
         max-width: 85%;
         font-size: 16px;
     }
-    
+
     .user-menu {
         position: relative;
         top: 0;
@@ -305,12 +305,12 @@ header h1 {
         justify-content: center;
         margin-top: 10px;
     }
-    
+
     .theme-toggle {
         top: 5px;
         left: 5px;
     }
-    
+
     .branding {
         margin-top: 25px;
     }
@@ -845,4 +845,26 @@ body.dark-theme .profile-field {
     background-color: #3498db;
     color: white;
     text-align: center;
+}
+
+.api-keys, .api-keys-login-notice {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.api-keys-login-notice {
+    text-align: center;
+}
+
+.api-keys-login-notice a {
+    color: #4285f4;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.api-keys-login-notice a:hover {
+    text-decoration: underline;
 }

@@ -75,6 +75,10 @@ def index():
 
 @app.route('/save_api_key', methods=['POST'])
 def save_api_key():
+    # Prüfe, ob der Benutzer angemeldet ist
+    if not current_user.is_authenticated:
+        return jsonify({"success": False, "error": "Sie müssen angemeldet sein, um API-Schlüssel zu speichern."})
+        
     service = request.form.get('service')
     api_key = request.form.get('api_key')
 
