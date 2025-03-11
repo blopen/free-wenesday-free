@@ -158,8 +158,9 @@ header h1 {
     flex: 1;
     padding: 15px;
     overflow-y: auto;
-    padding-bottom: 70px; /* Platz für das Eingabefeld */
+    padding-bottom: 80px; /* Mehr Platz für das Eingabefeld */
     height: calc(100% - 70px);
+    margin-bottom: 10px;
 }
 
 .message {
@@ -206,13 +207,15 @@ header h1 {
     display: flex;
     padding: 10px;
     border-top: 1px solid #f1f1f1;
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     background-color: white;
-    z-index: 10;
+    z-index: 100;
     box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 100%;
 }
 
 .chat-input textarea {
