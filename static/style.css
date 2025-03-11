@@ -212,10 +212,11 @@ header h1 {
     left: 0;
     right: 0;
     background-color: white;
-    z-index: 100;
+    z-index: 1000;
     box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
     width: 100%;
     max-width: 100%;
+    margin: 0 auto;
 }
 
 .chat-input textarea {

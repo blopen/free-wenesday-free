@@ -1,7 +1,7 @@
+
 document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
     const modelItems = document.querySelectorAll('.model-item');
-    const saveApiKeyBtn = document.getElementById('save-api-key');
     const apiServiceSelect = document.getElementById('api-service');
     const apiKeyInput = document.getElementById('api-key-input');
     const chatMessages = document.getElementById('chat-messages');
@@ -14,18 +14,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme');
-        themeToggle.checked = true;
+        if (themeToggle) themeToggle.checked = true;
     }
 
-    themeToggle.addEventListener('change', function() {
-        if (this.checked) {
-            document.body.classList.add('dark-theme');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.body.classList.remove('dark-theme');
-            localStorage.setItem('theme', 'light');
-        }
-    });
+    if (themeToggle) {
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    }
 
     // Admin Login Funktionalität
     if (adminLoginBtn) {
@@ -68,27 +70,16 @@ document.addEventListener('DOMContentLoaded', function() {
     let activeModel = document.querySelector('.model-item.active')?.dataset.model || 'claude-free';
     let isProcessing = false;
 
-    // Hilfsfunktion, um DOM-Elemente sicher zu selektieren
-    function safeQuerySelector(selector) {
-        const element = document.querySelector(selector);
-        if (!element) {
-            console.warn(`Element mit Selektor "${selector}" nicht gefunden`);
-            return null;
-        }
-        return element;
-    }
-
     // API-Key-Speichern-Button sicher abrufen
-    const saveApiKeyBtn = safeQuerySelector('#save-api-key');
+    const saveApiKeyBtn = document.getElementById('save-api-key');
     if (saveApiKeyBtn) {
         saveApiKeyBtn.addEventListener('click', saveApiKey);
     }
 
-    // Chat-Nachrichten-Container sicher abrufen
-    const chatMessages = safeQuerySelector('#chat-messages');
-
     // Initialize chat history from session if available
-    initializeChat();
+    if (chatMessages) {
+        initializeChat();
+    }
 
     // Event listeners for model selection
     modelItems.forEach(item => {
@@ -125,8 +116,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Event listener for API key saving
-    saveApiKeyBtn.addEventListener('click', function() {
+    // Function to save API key
+    function saveApiKey() {
         const service = apiServiceSelect.value;
         const apiKey = apiKeyInput.value;
 
@@ -151,21 +142,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Update displayed keys without page reload
                 const savedKeysList = document.querySelector('.saved-api-keys ul');
-                let keyExists = false;
+                if (savedKeysList) {
+                    let keyExists = false;
 
-                // Check if service already exists in list
-                const listItems = savedKeysList.querySelectorAll('li');
-                listItems.forEach(item => {
-                    if (item.textContent.startsWith(service)) {
-                        keyExists = true;
+                    // Check if service already exists in list
+                    const listItems = savedKeysList.querySelectorAll('li');
+                    listItems.forEach(item => {
+                        if (item.textContent.startsWith(service)) {
+                            keyExists = true;
+                        }
+                    });
+
+                    // Add service to list if not present
+                    if (!keyExists) {
+                        const newKeyItem = document.createElement('li');
+                        newKeyItem.textContent = `${service}: ********`;
+                        savedKeysList.appendChild(newKeyItem);
                     }
-                });
-
-                // Add service to list if not present
-                if (!keyExists) {
-                    const newKeyItem = document.createElement('li');
-                    newKeyItem.textContent = `${service}: ********`;
-                    savedKeysList.appendChild(newKeyItem);
                 }
             } else {
                 addSystemMessage('Fehler beim Speichern des API-Schlüssels.');
@@ -175,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Fehler:', error);
             addSystemMessage('Fehler bei der Kommunikation mit dem Server.');
         });
-    });
+    }
 
     // Erstellen der iframe-Proxy-Instanz und stellen sicher, dass es nur eine gibt
     let iframeProxy;
@@ -398,6 +391,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Hilfsfunktion, um die letzte Benutzeranfrage zu erhalten
     function getLastUserMessage() {
+        if (!chatMessages) return "";
         const userMessages = chatMessages.querySelectorAll('.message-user .message-content');
         if (userMessages.length > 0) {
             return userMessages[userMessages.length - 1].textContent;
@@ -441,6 +435,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add message to chat
     function addMessage(content, sender) {
+        if (!chatMessages) return;
+        
         const messageDiv = document.createElement('div');
         messageDiv.className = `message message-${sender}`;
 
@@ -460,6 +456,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add system message (notifications, errors, etc.)
     function addSystemMessage(content) {
+        if (!chatMessages) return;
+        
         const messageDiv = document.createElement('div');
         messageDiv.className = 'system-message';
         messageDiv.textContent = content;
@@ -487,6 +485,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Show typing indicator
     function showTypingIndicator() {
+        if (!chatMessages) return;
+        
         const typingDiv = document.createElement('div');
         typingDiv.className = 'message message-bot';
         typingDiv.id = 'typing-indicator';
@@ -510,6 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Scroll chat to bottom
     function scrollToBottom() {
+        if (!chatMessages) return;
         chatMessages.scrollTop = chatMessages.scrollHeight;
         // Stelle sicher, dass das Scroll-Verhalten auch auf Mobilgeräten funktioniert
         setTimeout(() => {
@@ -519,31 +520,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize chat with welcome message
     function initializeChat() {
-        addMessage('Hallo! Wie kann ich Ihnen helfen?', 'bot');
+        if (!chatMessages) return;
+        
+        // Nur initialisieren, wenn der Chat leer ist
+        if (chatMessages.children.length === 0) {
+            addMessage('Hallo! Wie kann ich Ihnen helfen?', 'bot');
+        }
     }
 
     // Event listeners for message sending
-    sendMessageBtn.addEventListener('click', sendMessage);
+    if (sendMessageBtn) {
+        sendMessageBtn.addEventListener('click', sendMessage);
+    }
 
     // Event listener for Enter key (with Shift+Enter for new line)
-    messageInput.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            sendMessage();
-        }
-    });
+    if (messageInput) {
+        messageInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
 
-    // Adjust textarea height as content grows
-    messageInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        const maxHeight = 150; // Maximum height in pixels
+        // Adjust textarea height as content grows
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            const maxHeight = 150; // Maximum height in pixels
 
-        if (this.scrollHeight <= maxHeight) {
-            this.style.height = this.scrollHeight + 'px';
-        } else {
-            this.style.height = maxHeight + 'px';
-        }
-    });
+            if (this.scrollHeight <= maxHeight) {
+                this.style.height = this.scrollHeight + 'px';
+            } else {
+                this.style.height = maxHeight + 'px';
+            }
+        });
+    }
 
     // Handle connection errors
     window.addEventListener('online', function() {
@@ -554,10 +564,10 @@ document.addEventListener('DOMContentLoaded', function() {
         addSystemMessage('Keine Internetverbindung. Bitte überprüfen Sie Ihre Verbindung.');
     });
 
-    // API-Schlüssel speichern
+    // API-Schlüssel sicher speichern
     document.getElementById('save-api-key-btn')?.addEventListener('click', function() {
-        const service = document.getElementById('service-selector').value;
-        const apiKey = document.getElementById('api-key-input').value;
+        const service = document.getElementById('service-selector')?.value;
+        const apiKey = document.getElementById('api-key-input')?.value;
 
         if (!apiKey) {
             alert('Bitte geben Sie einen API-Schlüssel ein.');
@@ -576,28 +586,31 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 // Aktualisiere die Liste der gespeicherten Schlüssel
                 const savedKeysList = document.getElementById('saved-keys-list');
+                if (savedKeysList) {
+                    // Prüfe, ob der Schlüssel bereits in der Liste ist
+                    let keyExists = false;
+                    for (const li of savedKeysList.children) {
+                        if (li.textContent.startsWith(service + ':')) {
+                            keyExists = true;
+                            break;
+                        }
+                    }
 
-                // Prüfe, ob der Schlüssel bereits in der Liste ist
-                let keyExists = false;
-                for (const li of savedKeysList.children) {
-                    if (li.textContent.startsWith(service + ':')) {
-                        keyExists = true;
-                        break;
+                    if (!keyExists) {
+                        const newKey = document.createElement('li');
+                        newKey.textContent = `${service}: ********`;
+                        savedKeysList.appendChild(newKey);
                     }
                 }
 
-                if (!keyExists) {
-                    const newKey = document.createElement('li');
-                    newKey.textContent = `${service}: ********`;
-                    savedKeysList.appendChild(newKey);
+                // Eingabefeld zurücksetzen
+                if (document.getElementById('api-key-input')) {
+                    document.getElementById('api-key-input').value = '';
                 }
 
-                // Eingabefeld zurücksetzen
-                document.getElementById('api-key-input').value = '';
-
-                showToast('API-Schlüssel gespeichert!');
+                alert('API-Schlüssel gespeichert!');
             } else if (data.error) {
-                showToast(data.error);
+                alert(data.error);
                 if (data.error.includes('angemeldet')) {
                     setTimeout(() => {
                         window.location.href = '/auth/login';
@@ -607,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Fehler beim Speichern des API-Schlüssels:', error);
-            showToast('Fehler beim Speichern des API-Schlüssels');
+            alert('Fehler beim Speichern des API-Schlüssels');
         });
     });
 });

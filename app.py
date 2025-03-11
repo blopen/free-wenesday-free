@@ -1,6 +1,10 @@
 import os
 import requests
 import uuid
+import base64
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from flask_session import Session
 from flask_login import LoginManager, current_user
@@ -11,11 +15,43 @@ from models import User
 from auth import auth_bp, init_oauth
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.urandom(24)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", os.urandom(24))
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_PERMANENT_LIFETIME"] = 3600  # 1 Stunde
 Session(app)
+
+# Verschlüsselungsfunktionen für API-Keys
+def get_encryption_key():
+    # Aus dem Secret Key einen Verschlüsselungsschlüssel ableiten
+    salt = b'wensday_cloud_salt'  # Ein fester Salt für Konsistenz
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(app.config["SECRET_KEY"] if isinstance(app.config["SECRET_KEY"], bytes) 
+                                           else app.config["SECRET_KEY"].encode()))
+    return key
+
+def encrypt_api_key(api_key):
+    if not api_key:
+        return None
+    key = get_encryption_key()
+    f = Fernet(key)
+    return f.encrypt(api_key.encode()).decode()
+
+def decrypt_api_key(encrypted_key):
+    if not encrypted_key:
+        return None
+    key = get_encryption_key()
+    f = Fernet(key)
+    try:
+        return f.decrypt(encrypted_key.encode()).decode()
+    except Exception as e:
+        print(f"Fehler beim Entschlüsseln: {e}")
+        return None
 
 # Login-Manager initialisieren
 login_manager = LoginManager()
@@ -85,9 +121,14 @@ def save_api_key():
     service = request.form.get('service')
     api_key = request.form.get('api_key')
 
-    # API-Schlüssel in der Session speichern
+    if not service or not api_key:
+        return jsonify({"success": False, "error": "Service und API-Key müssen angegeben werden."})
+
+    # API-Schlüssel verschlüsseln und in der Session speichern
+    encrypted_key = encrypt_api_key(api_key)
+    
     api_keys = session.get('api_keys', {})
-    api_keys[service] = api_key
+    api_keys[service] = encrypted_key
     session['api_keys'] = api_keys
 
     return jsonify({"success": True})
@@ -106,10 +147,11 @@ def chat():
     model = session.get('active_model', 'gpt-3.5-turbo')
     model_info = MODELS.get(model)
 
-    # API-Schlüssel abrufen
+    # API-Schlüssel abrufen und entschlüsseln
     api_keys = session.get('api_keys', {})
     service = model_info['service']
-    api_key = api_keys.get(service)
+    encrypted_api_key = api_keys.get(service)
+    api_key = decrypt_api_key(encrypted_api_key) if encrypted_api_key else None
 
     # Wenn kein API-Schlüssel vorhanden ist und es kein freies Modell ist
     if not api_key and not model_info['free']:
