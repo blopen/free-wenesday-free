@@ -212,7 +212,7 @@ header h1 {
     left: 0;
     right: 0;
     background-color: white;
-    z-index: 1000;
+    z-index: 2000;
     box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
     width: 100%;
     max-width: 100%;
@@ -293,7 +293,26 @@ header h1 {
 
     .chat-container {
         height: calc(100vh - 130px);
-        margin-bottom: 0;
+        margin-bottom: 70px;
+    }
+    
+    .chat-messages {
+        padding-bottom: 100px;
+    }
+    
+    .chat-input {
+        padding: 8px;
+        height: auto;
+        min-height: 60px;
+    }
+    
+    .chat-input textarea {
+        font-size: 16px;
+    }
+    
+    .chat-input button {
+        min-width: 60px;
+        font-size: 14px;
     }
 
     .message-content {

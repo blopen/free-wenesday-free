@@ -1,12 +1,26 @@
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Stelle sicher, dass alle DOM-Elemente initialisiert werden, wenn sie verfügbar sind
+    let chatMessages, messageInput, sendMessageBtn;
+    
     // DOM elements
     const modelItems = document.querySelectorAll('.model-item');
     const apiServiceSelect = document.getElementById('api-service');
     const apiKeyInput = document.getElementById('api-key-input');
-    const chatMessages = document.getElementById('chat-messages');
-    const messageInput = document.getElementById('message-input');
-    const sendMessageBtn = document.getElementById('send-message');
+    
+    // Verzögertes Abrufen der Chat-Elemente, um sicherzustellen, dass sie geladen sind
+    setTimeout(() => {
+        chatMessages = document.getElementById('chat-messages');
+        messageInput = document.getElementById('message-input');
+        sendMessageBtn = document.getElementById('send-message');
+        
+        // Initialisiere Chat nach erfolgreicher Elementbindung
+        if (chatMessages && messageInput && sendMessageBtn) {
+            initializeChat();
+            setupChatEventListeners();
+        }
+    }, 500);
+    
     const adminLoginBtn = document.getElementById('admin-login-btn');
     const themeToggle = document.getElementById('theme-toggle-checkbox');
 
@@ -516,6 +530,9 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }, 100);
+        
+        // Sicherstellen, dass das Eingabefeld immer sichtbar ist
+        document.querySelector('.chat-input').style.display = 'flex';
     }
 
     // Initialize chat with welcome message
@@ -528,31 +545,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Event listeners for message sending
-    if (sendMessageBtn) {
-        sendMessageBtn.addEventListener('click', sendMessage);
+    // Funktion zur Einrichtung von Chat-Event-Listenern
+    function setupChatEventListeners() {
+        // Event listeners for message sending
+        if (sendMessageBtn) {
+            sendMessageBtn.addEventListener('click', sendMessage);
+        }
+    
+        // Event listener for Enter key (with Shift+Enter for new line)
+        if (messageInput) {
+            messageInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+    
+            // Adjust textarea height as content grows
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                const maxHeight = 150; // Maximum height in pixels
+    
+                if (this.scrollHeight <= maxHeight) {
+                    this.style.height = this.scrollHeight + 'px';
+                } else {
+                    this.style.height = maxHeight + 'px';
+                }
+            });
+        }
     }
-
-    // Event listener for Enter key (with Shift+Enter for new line)
-    if (messageInput) {
-        messageInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        });
-
-        // Adjust textarea height as content grows
-        messageInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            const maxHeight = 150; // Maximum height in pixels
-
-            if (this.scrollHeight <= maxHeight) {
-                this.style.height = this.scrollHeight + 'px';
-            } else {
-                this.style.height = maxHeight + 'px';
-            }
-        });
+    
+    // Initiale Einrichtung der Event-Listener versuchen
+    if (sendMessageBtn && messageInput) {
+        setupChatEventListeners();
     }
 
     // Handle connection errors
