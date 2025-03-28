@@ -47,9 +47,17 @@
         {% endif %}
         {% endwith %}
 
-        {% block content %}{% endblock %}
-    </div>
+        {% block content %}
+        {% endblock %}
 
-    <script src="/static/script.js"></script>
-</body>
+        <footer style="background-color: #333; color: white; padding: 20px 0; text-align: center; position: fixed; bottom: 0; width: 100%; z-index: 1000;">
+            <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; gap: 40px;">
+                <a href="https://github.com/blopen/free-wenesday-free" style="color: white; text-decoration: none; font-weight: bold;">GitHub Repository</a>
+                <span>|</span>
+                <a href="https://lopez.codes" style="color: white; text-decoration: none; font-weight: bold;">Provider: lopez.codes</a>
+            </div>
+        </footer>
+
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+    </body>
 </html>

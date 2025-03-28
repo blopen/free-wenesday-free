@@ -153,9 +153,10 @@ header h1 {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     min-height: 300px;
     position: relative;
-    height: calc(100vh - 150px);
+    height: calc(100vh - 190px);
     overflow-y: auto;
-    padding-bottom: 70px;
+    padding-bottom: 90px;
+    margin-bottom: 60px;
 }
 
 .chat-messages {
