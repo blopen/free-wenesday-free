@@ -34,7 +34,7 @@ header h1 {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 140px); /* Adjusted height to account for footer */
 }
 
 .sidebar {
@@ -195,13 +195,6 @@ header h1 {
 
 .message-user .message-content {
     background-color: #2196F3;
-
-/* Offline-Badge-Stil */
-.model-badge.offline {
-    background-color: #3a86ff;
-    margin-left: 4px;
-}
-
     color: white;
     border-bottom-right-radius: 4px;
 }
@@ -310,21 +303,21 @@ body.dark-theme .chat-input {
         height: calc(100vh - 130px);
         margin-bottom: 70px;
     }
-    
+
     .chat-messages {
         padding-bottom: 100px;
     }
-    
+
     .chat-input {
         padding: 8px;
         height: auto;
         min-height: 60px;
     }
-    
+
     .chat-input textarea {
         font-size: 16px;
     }
-    
+
     .chat-input button {
         min-width: 60px;
         font-size: 14px;
@@ -905,4 +898,21 @@ body.dark-theme .profile-field {
 
 .api-keys-login-notice a:hover {
     text-decoration: underline;
+}
+
+/* Offline-Badge-Stil */
+.model-badge.offline {
+    background-color: #3a86ff;
+    margin-left: 4px;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    position: relative;
+    width: 100%;
+    margin-top: 40px;
+    z-index: 1000;
 }
