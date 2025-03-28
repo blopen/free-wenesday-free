@@ -9,15 +9,16 @@ body {
     background-color: #f5f5f5;
     min-height: 100vh;
     min-width: 100vw;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 .container {
     min-width: 1200px;
-    width: 100%;
+    width: max-content;
     margin: 0 auto;
     padding: 10px;
-    overflow: auto;
+    overflow: visible;
 }
 
 header {
