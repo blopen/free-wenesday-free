@@ -210,14 +210,12 @@ header h1 {
 .chat-input {
     display: flex !important;
     padding: 10px;
-    border-top: 1px solid #f1f1f1;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    border-bottom: 1px solid #f1f1f1;
+    position: sticky;
+    top: 0;
     background-color: white;
     z-index: 9999;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     min-height: 60px;
     width: 100%;
     max-width: 100%;
