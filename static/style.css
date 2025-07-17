@@ -393,6 +393,29 @@ body.dark-theme .chat-input {
     height: 0;
 }
 
+.theme-toggle select {
+    padding: 4px;
+    border-radius: 4px;
+}
+
+body.dark-theme .theme-toggle select {
+    background-color: #333;
+    color: #f5f5f5;
+    border: 1px solid #555;
+}
+
+body.green-matrix-theme .theme-toggle select {
+    background-color: #111;
+    color: #0f0;
+    border: 1px solid #0f0;
+}
+
+body.pink-matrix-theme .theme-toggle select {
+    background-color: #111;
+    color: #ff69b4;
+    border: 1px solid #ff69b4;
+}
+
 .slider {
     position: absolute;
     cursor: pointer;
@@ -503,6 +526,150 @@ body.dark-theme .api-key-form input {
 
 body.dark-theme .saved-api-keys li {
     color: #ccc;
+}
+
+/* Green Matrix theme */
+body.green-matrix-theme {
+    background-color: #000;
+    color: #0f0;
+}
+
+body.green-matrix-theme .container {
+    background-color: #000;
+}
+
+body.green-matrix-theme header h1 {
+    color: #0f0;
+}
+
+body.green-matrix-theme .sidebar {
+    background-color: #111;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+body.green-matrix-theme .model-item {
+    background-color: #222;
+}
+
+body.green-matrix-theme .model-item:hover {
+    background-color: #333;
+}
+
+body.green-matrix-theme .model-item.active {
+    background-color: #0f0;
+    border-left: 3px solid #0b0;
+}
+
+body.green-matrix-theme .model-name {
+    color: #0f0;
+}
+
+body.green-matrix-theme .model-service {
+    color: #0a0;
+}
+
+body.green-matrix-theme .chat-container {
+    background-color: #111;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+body.green-matrix-theme .message-bot .message-content {
+    background-color: #222;
+    color: #0f0;
+}
+
+body.green-matrix-theme .chat-input textarea {
+    background-color: #222;
+    color: #0f0;
+    border: 1px solid #333;
+}
+
+body.green-matrix-theme .system-message {
+    background-color: #112;
+    color: #0f0;
+}
+
+body.green-matrix-theme .api-key-form select,
+body.green-matrix-theme .api-key-form input {
+    background-color: #222;
+    color: #0f0;
+    border: 1px solid #333;
+}
+
+body.green-matrix-theme .saved-api-keys li {
+    color: #0f0;
+}
+
+/* Pink Matrix theme */
+body.pink-matrix-theme {
+    background-color: #000;
+    color: #ff69b4;
+}
+
+body.pink-matrix-theme .container {
+    background-color: #000;
+}
+
+body.pink-matrix-theme header h1 {
+    color: #ff69b4;
+}
+
+body.pink-matrix-theme .sidebar {
+    background-color: #111;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+body.pink-matrix-theme .model-item {
+    background-color: #222;
+}
+
+body.pink-matrix-theme .model-item:hover {
+    background-color: #333;
+}
+
+body.pink-matrix-theme .model-item.active {
+    background-color: #ff69b4;
+    border-left: 3px solid #ff1493;
+}
+
+body.pink-matrix-theme .model-name {
+    color: #ff69b4;
+}
+
+body.pink-matrix-theme .model-service {
+    color: #ff8acb;
+}
+
+body.pink-matrix-theme .chat-container {
+    background-color: #111;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+body.pink-matrix-theme .message-bot .message-content {
+    background-color: #222;
+    color: #ff69b4;
+}
+
+body.pink-matrix-theme .chat-input textarea {
+    background-color: #222;
+    color: #ff69b4;
+    border: 1px solid #333;
+}
+
+body.pink-matrix-theme .system-message {
+    background-color: #112;
+    color: #ff69b4;
+}
+
+body.pink-matrix-theme .api-key-form select,
+body.pink-matrix-theme .api-key-form input {
+    background-color: #222;
+    color: #ff69b4;
+    border: 1px solid #333;
+}
+
+body.pink-matrix-theme .saved-api-keys li {
+    color: #ff69b4;
 }
 
 /* Admin Login Button */

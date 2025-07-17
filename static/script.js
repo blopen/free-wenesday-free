@@ -22,25 +22,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
     
     const adminLoginBtn = document.getElementById('admin-login-btn');
-    const themeToggle = document.getElementById('theme-toggle-checkbox');
+    const themeSelector = document.getElementById('theme-selector');
 
-    // Theme toggle functionality
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-theme');
-        if (themeToggle) themeToggle.checked = true;
+    // Theme selector functionality
+    const savedTheme = localStorage.getItem('theme') || 'light';
+
+    applyTheme(savedTheme);
+    if (themeSelector) {
+        themeSelector.value = savedTheme;
+        themeSelector.addEventListener('change', function() {
+            const selected = this.value;
+            applyTheme(selected);
+            localStorage.setItem('theme', selected);
+        });
     }
 
-    if (themeToggle) {
-        themeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('theme', 'light');
-            }
-        });
+    function applyTheme(theme) {
+        document.body.classList.remove('dark-theme', 'green-matrix-theme', 'pink-matrix-theme');
+        if (theme === 'dark') {
+            document.body.classList.add('dark-theme');
+        } else if (theme === 'green-matrix') {
+            document.body.classList.add('green-matrix-theme');
+        } else if (theme === 'pink-matrix') {
+            document.body.classList.add('pink-matrix-theme');
+        }
     }
 
     // Admin Login Funktionalität
