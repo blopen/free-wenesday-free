@@ -53,3 +53,20 @@ Command:"@w" as ChatGPT and Bing prompt.
 If you would like to contribute to the project, please submit a pull request with your changes. We welcome all contributions!
 # free-wenesday-free
 -- Community-free-Version of WenesdayOS: 1.2.3
+
+## Collaborative GPT-4 Sessions
+
+The project provides experimental collaborative chat sessions powered by GPT-4.
+
+To use this feature, configure an `OPENAI_API_KEY` environment variable before
+starting the Flask application. The following endpoints are available:
+
+- `POST /collab/create` – create a new collaborative session and obtain a
+  `session_id`.
+- `POST /collab/<session_id>/chat` – send a message to the session and receive
+  the model's response along with the updated history.
+- `GET /collab/<session_id>/history` – retrieve the current history of a
+  session.
+
+These endpoints make it easy for multiple clients to share a conversation and
+receive GPT-4 powered responses.

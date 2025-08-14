@@ -13,6 +13,7 @@ from app_config import MODEL_PROXY_URLS, FREE_MODEL_RATE_LIMITS  # Import der Ko
 from werkzeug.urls import url_parse  # Use url_parse instead of url_quote
 from models import User
 from auth import auth_bp, init_oauth
+from collaboration import collab_bp
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", os.urandom(24))
@@ -71,6 +72,7 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 
 # Registriere Admin-Routen
 admin.register_admin_routes(app)
+app.register_blueprint(collab_bp)
 
 # Verfügbare KI-Modelle mit Details
 MODELS = {
