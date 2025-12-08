@@ -54,6 +54,28 @@ If you would like to contribute to the project, please submit a pull request wit
 # free-wenesday-free
 -- Community-free-Version of WenesdayOS: 1.2.3
 
+## Microservice orchestration guide
+
+The application can be containerized and orchestrated as a collection of microservices to reduce coupling and scale independently:
+
+- **Identify bounded contexts**: group related routes and models (for example, the authentication logic in `auth.py` and collaboration endpoints in `collaboration.py`) into separate services with their own data stores.
+- **Isolate service interfaces**: expose only the necessary REST endpoints or message queues for each service. Keep cross-service communication asynchronous where possible to avoid tight coupling.
+- **Centralize shared contracts**: define common schemas and request/response contracts (for example JSON payloads for algorithm metadata) in a shared package that services can import to stay in sync.
+- **Automate builds**: containerize each service with a Dockerfile. A base example lives at the repository root and installs Python dependencies from `requirements.txt` before running `app.py`.
+- **Orchestrate deployments**: use Docker Compose or an orchestrator such as Azure Kubernetes Service to deploy services together. Compose files can specify per-service images, environment variables, and shared networks so that clients can reach each service by name.
+- **Scale clients intelligently**: split large clients into domain-specific front-end bundles or API gateways that forward requests to the appropriate service. This keeps the client lightweight while still supporting the full feature set.
+
+### Running the base container locally
+
+To build and run the monolithic app in a container (as a starting point before splitting services):
+
+```
+docker build -t wenesday-app .
+docker run -p 5000:5000 --env OPENAI_API_KEY=your_key_here wenesday-app
+```
+
+Once each service has its own Dockerfile, a `docker-compose.yml` can orchestrate them behind a reverse proxy. Azure users can lift the same images into Azure Container Apps or Azure Kubernetes Service without changing the Dockerfiles.
+
 ## Collaborative GPT-4 Sessions
 
 The project provides experimental collaborative chat sessions powered by GPT-4.
