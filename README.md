@@ -49,6 +49,124 @@ Install the project dependencies that match the part of the project you are work
 
 For the base Python application, start by reviewing `requirements.txt`, then configure required environment variables such as `OPENAI_API_KEY` only in a local environment file or secret manager. Do not commit secrets, personal data, API keys, tokens, session files, or generated credentials.
 
+## Working With `.wd` Files
+
+Files ending in `.wd` are Wenesday definition files. In this repository they can be used as lightweight text instructions, command definitions, prompts, workflow notes, or small project-specific configuration blocks.
+
+Treat `.wd` files as data first, not trusted executable code. Read, validate, and interpret them with a small parser in the host language instead of directly executing their contents.
+
+A simple `.wd` file can look like this:
+
+```text
+# hello.wd
+name: hello-wenesday
+kind: command
+version: 1
+
+run: say hello from Wenesday
+```
+
+Recommended basic rules:
+
+- Use UTF-8 text.
+- Use `#` for comments.
+- Use `key: value` lines for simple metadata.
+- Leave blank lines between logical sections.
+- Do not store secrets, tokens, passwords, personal data, or private prompts in `.wd` files.
+- Validate allowed keys before using the file in an app, agent, script, or service.
+
+### Reading `.wd` Files With Python
+
+```python
+from pathlib import Path
+
+
+def read_wd(path: str) -> dict[str, str]:
+    data: dict[str, str] = {}
+
+    for raw_line in Path(path).read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if ":" not in line:
+            raise ValueError(f"Invalid .wd line: {raw_line}")
+
+        key, value = line.split(":", 1)
+        data[key.strip()] = value.strip()
+
+    allowed_keys = {"name", "kind", "version", "run"}
+    unknown_keys = set(data) - allowed_keys
+    if unknown_keys:
+        raise ValueError(f"Unknown .wd keys: {sorted(unknown_keys)}")
+
+    return data
+
+
+command = read_wd("hello.wd")
+print(command["name"], command.get("run", ""))
+```
+
+### Reading `.wd` Files With C++
+
+```cpp
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+
+static std::string trim(const std::string& value) {
+    const auto start = value.find_first_not_of(" \t\r\n");
+    if (start == std::string::npos) return "";
+    const auto end = value.find_last_not_of(" \t\r\n");
+    return value.substr(start, end - start + 1);
+}
+
+std::map<std::string, std::string> readWd(const std::string& path) {
+    std::ifstream file(path);
+    if (!file) throw std::runtime_error("Could not open .wd file");
+
+    std::map<std::string, std::string> data;
+    std::set<std::string> allowed = {"name", "kind", "version", "run"};
+    std::string line;
+
+    while (std::getline(file, line)) {
+        std::string cleaned = trim(line);
+        if (cleaned.empty() || cleaned[0] == '#') continue;
+
+        const auto separator = cleaned.find(':');
+        if (separator == std::string::npos) {
+            throw std::runtime_error("Invalid .wd line: " + line);
+        }
+
+        std::string key = trim(cleaned.substr(0, separator));
+        std::string value = trim(cleaned.substr(separator + 1));
+
+        if (!allowed.contains(key)) {
+            throw std::runtime_error("Unknown .wd key: " + key);
+        }
+
+        data[key] = value;
+    }
+
+    return data;
+}
+
+int main() {
+    auto command = readWd("hello.wd");
+    std::cout << command["name"] << " -> " << command["run"] << '\n';
+}
+```
+
+### Safety Notes for `.wd`
+
+- Never pass `.wd` content directly into a shell, compiler, AI tool, browser, database query, or network call.
+- Use allowlists for commands, file paths, model/tool names, and environment variables.
+- Keep a human review step for `.wd` files that can affect people, privacy, security, or AI behavior.
+- For AI-related `.wd` files, apply the [EU AI Act Readiness Pack](docs/compliance/eu-ai-act-readiness.md) and [Human Impact Assessment](docs/compliance/human-impact-assessment.md).
+
 ## Contributing
 
 Contributions are welcome when they improve the project while respecting privacy, safety, security, and inclusion.
