@@ -24,6 +24,18 @@ Please read the project foundation documents before contributing:
 - [Privacy Policy](PRIVACY.md)
 - [Ethics Policy](ETHICS.md)
 
+## EU Data and AI Governance
+
+The repository includes a practical governance package for deployments that process personal data, affect real people, or use AI-assisted functionality:
+
+- [EU Data and AI Governance Pack](docs/compliance/README.md)
+- [GDPR Data Protection Pack](docs/compliance/gdpr-data-protection-pack.md)
+- [Data Subject Request Playbook](docs/compliance/data-subject-request-playbook.md)
+- [EU AI Act Readiness Pack](docs/compliance/eu-ai-act-readiness.md)
+- [Human Impact Assessment](docs/compliance/human-impact-assessment.md)
+
+Use these documents before merging or deploying features that collect personal data, rely on AI, classify or recommend content, affect access or opportunity, or create safety, discrimination, privacy, or human-rights risks.
+
 ## Getting Started
 
 Clone the repository:
