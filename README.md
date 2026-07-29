@@ -1,75 +1,103 @@
-This repository contains code and files for the "Wenesday" project. Wenesday is a web application that allows users to create and share their favorite recipes, as well as browse recipes from other users.
+# free-wenesday-free
+
+Community-free version of WenesdayOS: 1.2.3
+
+This repository contains code and files for the Wenesday project. Wenesday is an experimental web application and community project for creating, sharing, and browsing algorithms, ideas, and collaborative AI-assisted workflows.
 
 Provider: IT.lopez-be.ch >> lopez.codes >> lopez.zone >> lopez.one
 
-Getting Started:
+## Project Values
 
-This project is a web application called "Wenesday" that allows users to create, share, and browse their favorite algorithms. The application is built using React, React-Router, Redux, Material-UI, and Firebase and includes endpoints that enable the creation, updating, and deletion of algorithms. Users can also search for algorithms and filter them by various criteria. The goal of Wenesday is to create a vibrant community of algorithm enthusiasts and foster the exchange of algorithmic ideas.
+free-wenesday-free is intended to be open, safe, privacy-aware, and inclusive.
 
-If you would like to contribute to the Wenesday project, you can do so by cloning the repository to your local machine. To do this, you will need to have Git installed on your computer. Once you have Git installed, you can clone the repository by running the following command in your terminal:
+- Human dignity, equal treatment, and non-discrimination are core project principles.
+- Racism, antisemitism, sexism, homophobia, transphobia, hate speech, harassment, and exclusionary conduct are not accepted.
+- Privacy and data minimization guide design and operations.
+- Security issues should be reported responsibly and handled with care.
+- AI-assisted features should be transparent, accountable, and reviewed by humans where they can affect people.
 
->> git clone https://github.com/blopen/free-wenesday-free
+Please read the project foundation documents before contributing:
 
-After you have cloned the repository, you can make changes to the code and files as needed. When you are ready to commit your changes, be sure to create a new branch and commit your changes to that branch. Once you have committed your changes, you can submit a pull request to the main branch for review.
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Contributing Guide](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Privacy Policy](PRIVACY.md)
+- [Ethics Policy](ETHICS.md)
 
-Dependencies:
+## Getting Started
 
-React
-React-Router
-Redux
-Material-UI
-Firebase
-TensorFlow
-OpenAI
-Quantum
-GPT-616-Quantinium (alias free-wenesday-free)
-LOPEZ-Modell für emotionale und psychische Gesundheit
+Clone the repository:
 
-License:
+```bash
+git clone https://github.com/blopen/free-wenesday-free
+cd free-wenesday-free
+```
 
-The Wenesday project is licensed under the MIT License. See the LICENSE file for more details.
+Install the project dependencies that match the part of the project you are working on. The repository currently contains Python, web, and experimental AI-related components, so check the relevant files before running services locally.
 
-License Amendment: Purchasing Version Availability for Large Inquiries
+For the base Python application, start by reviewing `requirements.txt`, then configure required environment variables such as `OPENAI_API_KEY` only in a local environment file or secret manager. Do not commit secrets, personal data, API keys, tokens, session files, or generated credentials.
 
-Availability of Purchasing Version for Large Inquiries
-Licensee acknowledges and agrees that the purchasing version of the Software will not be readily available for large inquiries. Licensor shall make reasonable efforts to accommodate Licensee's request for the purchasing version, but such availability is not guaranteed.
+## Contributing
 
-Contact Information
-For further assistance or questions regarding the availability of the purchasing version for large inquiries, Licensee may contact Licensor at https://github.com/blopen, or visit https://it.lopez-be.ch and 
-https://lopez.codes.
+Contributions are welcome when they improve the project while respecting privacy, safety, security, and inclusion.
 
-Effect of Amendment
-This Amendment shall be deemed incorporated into and made a part of the Agreement, and all other terms and conditions of the Agreement shall remain in full force and effect.
+1. Create a feature branch from `main`.
+2. Keep changes focused and easy to review.
+3. Add or update documentation when behavior, configuration, privacy, or security expectations change.
+4. Run relevant local checks before opening a pull request.
+5. Open a pull request and describe the impact, validation, and any risks.
 
-In witness whereof, the parties have executed this Amendment as of the date set forth below.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution workflow.
 
-Contributors:
+## Dependencies
 
-The following people have contributed to the development of the Wensday project:
+The project may include or reference:
 
-@wenesday@W (wenesday@lopez.codes) Nelson Lopez (nelson@it.lopez-be.ch)
+- React
+- React Router
+- Redux
+- Material UI
+- Firebase
+- TensorFlow
+- OpenAI APIs
+- Quantum/experimental components
+- GPT-616-Quantinium alias free-wenesday-free
+- LOPEZ model for emotional and mental health contexts
 
-Command:"@w" as ChatGPT and Bing prompt.
-If you would like to contribute to the project, please submit a pull request with your changes. We welcome all contributions!
-# free-wenesday-free
--- Community-free-Version of WenesdayOS: 1.2.3
+Use dependencies responsibly. Keep them updated, remove unused packages where possible, and avoid adding telemetry or data collection without a documented privacy reason.
 
-## Microservice orchestration guide
+## Security
+
+Report suspected vulnerabilities privately. Do not open public issues containing exploit details, secrets, personal data, or live credentials.
+
+See [SECURITY.md](SECURITY.md) for the disclosure process and secure development expectations.
+
+## Privacy and DSGVO
+
+The project follows privacy-by-design and data-minimization principles. Personal data should only be processed when necessary, documented, protected, and removable on request where legally required.
+
+See [PRIVACY.md](PRIVACY.md) for the DSGVO-oriented privacy baseline.
+
+## Ethics and Anti-Discrimination
+
+The project must not be used to promote hatred, discrimination, harassment, unlawful surveillance, or harm against people or protected groups. Human oversight is required for sensitive use cases, especially where AI-assisted functionality can affect rights, safety, access, or wellbeing.
+
+See [ETHICS.md](ETHICS.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## Microservice Orchestration Guide
 
 The application can be containerized and orchestrated as a collection of microservices to reduce coupling and scale independently:
 
-- **Identify bounded contexts**: group related routes and models (for example, the authentication logic in `auth.py` and collaboration endpoints in `collaboration.py`) into separate services with their own data stores.
-- **Isolate service interfaces**: expose only the necessary REST endpoints or message queues for each service. Keep cross-service communication asynchronous where possible to avoid tight coupling.
-- **Centralize shared contracts**: define common schemas and request/response contracts (for example JSON payloads for algorithm metadata) in a shared package that services can import to stay in sync.
+- **Identify bounded contexts**: group related routes and models, for example authentication logic in `auth.py` and collaboration endpoints in `collaboration.py`, into separate services with their own data stores.
+- **Isolate service interfaces**: expose only the necessary REST endpoints or message queues for each service. Keep cross-service communication asynchronous where possible.
+- **Centralize shared contracts**: define common schemas and request/response contracts, for example JSON payloads for algorithm metadata, in a shared package.
 - **Automate builds**: containerize each service with a Dockerfile. A base example lives at the repository root and installs Python dependencies from `requirements.txt` before running `app.py`.
-- **Orchestrate deployments**: use Docker Compose or an orchestrator such as Azure Kubernetes Service to deploy services together. Compose files can specify per-service images, environment variables, and shared networks so that clients can reach each service by name.
-- **Scale clients intelligently**: split large clients into domain-specific front-end bundles or API gateways that forward requests to the appropriate service. This keeps the client lightweight while still supporting the full feature set.
+- **Orchestrate deployments**: use Docker Compose or an orchestrator such as Azure Kubernetes Service to deploy services together.
+- **Scale clients intelligently**: split large clients into domain-specific front-end bundles or API gateways that forward requests to the appropriate service.
 
-### Running the base container locally
+### Running the Base Container Locally
 
-To build and run the monolithic app in a container (as a starting point before splitting services):
-
-```
+```bash
 docker build -t wenesday-app .
 docker run -p 5000:5000 --env OPENAI_API_KEY=your_key_here wenesday-app
 ```
@@ -80,15 +108,28 @@ Once each service has its own Dockerfile, a `docker-compose.yml` can orchestrate
 
 The project provides experimental collaborative chat sessions powered by GPT-4.
 
-To use this feature, configure an `OPENAI_API_KEY` environment variable before
-starting the Flask application. The following endpoints are available:
+Configure an `OPENAI_API_KEY` environment variable before starting the Flask application. The following endpoints are available:
 
-- `POST /collab/create` – create a new collaborative session and obtain a
-  `session_id`.
-- `POST /collab/<session_id>/chat` – send a message to the session and receive
-  the model's response along with the updated history.
-- `GET /collab/<session_id>/history` – retrieve the current history of a
-  session.
+- `POST /collab/create` creates a new collaborative session and returns a `session_id`.
+- `POST /collab/<session_id>/chat` sends a message to the session and returns the model response with updated history.
+- `GET /collab/<session_id>/history` retrieves the current history of a session.
 
-These endpoints make it easy for multiple clients to share a conversation and
-receive GPT-4 powered responses.
+Treat all conversation content as potentially sensitive. Avoid storing unnecessary personal data, and remove test data that is no longer needed.
+
+## License
+
+The Wenesday project is licensed under the MIT License. See the `LICENSE` directory for more details.
+
+### License Amendment: Purchasing Version Availability for Large Inquiries
+
+Licensee acknowledges and agrees that the purchasing version of the Software will not be readily available for large inquiries. Licensor shall make reasonable efforts to accommodate Licensee's request for the purchasing version, but such availability is not guaranteed.
+
+For further assistance or questions regarding the availability of the purchasing version for large inquiries, contact https://github.com/blopen, https://it.lopez-be.ch, or https://lopez.codes.
+
+## Contributors
+
+The following people have contributed to the development of the Wenesday project:
+
+@wenesday@W (wenesday@lopez.codes) Nelson Lopez (nelson@it.lopez-be.ch)
+
+Command: `@w` as ChatGPT and Bing prompt.
