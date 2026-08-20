@@ -14,18 +14,29 @@ function TypingIndicator() {
   )
 }
 
+const WD_HINTS = [
+  { icon: '💡', de: 'Frag mich alles',    en: 'Ask me anything' },
+  { icon: '📝', de: 'Code schreiben',     en: 'Write code' },
+  { icon: '🔍', de: 'Themen recherchieren', en: 'Research topics' },
+  { icon: '🌐', de: 'Text übersetzen',    en: 'Translate text' },
+  { icon: '⚡', de: 'Scripts generieren', en: 'Generate scripts' },
+  { icon: '🖼', de: 'Bild-Prompt erstellen', en: 'Create image prompt' },
+]
+
 function WelcomeScreen({ modelName }) {
   return (
     <div className="welcome">
-      <div className="welcome__logo">W</div>
+      <div className="welcome__logo">@w</div>
       <h1 className="welcome__title">Wenesday</h1>
-      <p className="welcome__subtitle">Free community AI chat — open source</p>
-      <p className="welcome__model">Active model: <strong>{modelName}</strong></p>
+      <p className="welcome__subtitle">Free community AI — open source · lopez.codes</p>
+      <p className="welcome__model">Aktives Modell / Active model: <strong>{modelName}</strong></p>
+      <p className="welcome__wd-hint">Tippe <code>@w</code> um die Wenesday-Persona zu aktivieren</p>
       <div className="welcome__hints">
-        <div className="welcome__hint">💡 Ask anything</div>
-        <div className="welcome__hint">📝 Write code</div>
-        <div className="welcome__hint">🔍 Research topics</div>
-        <div className="welcome__hint">🌐 Translate text</div>
+        {WD_HINTS.map((h) => (
+          <div key={h.en} className="welcome__hint">
+            {h.icon} {h.de} / {h.en}
+          </div>
+        ))}
       </div>
     </div>
   )

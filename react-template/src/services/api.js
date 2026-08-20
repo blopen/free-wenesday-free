@@ -1,3 +1,7 @@
+import { W_SYSTEM_PROMPT } from '../../wenesday/@w.js'
+
+export { W_SYSTEM_PROMPT }
+
 export const MODELS = [
   { id: 'gpt-3.5-turbo',              name: 'GPT-3.5 Turbo',       provider: 'openai',    free: true  },
   { id: 'gpt-4o-mini',                name: 'GPT-4o Mini',          provider: 'openai',    free: false },
@@ -78,7 +82,14 @@ async function callGroq(messages, modelId, apiKey) {
   return data.choices[0].message.content
 }
 
+/** Prepend @w system prompt if not already present */
+function withWSystem(messages) {
+  if (messages[0]?.role === 'system') return messages
+  return [{ role: 'system', content: W_SYSTEM_PROMPT }, ...messages]
+}
+
 export async function sendMessage(messages, modelId, apiKeys) {
+  messages = withWSystem(messages)
   const provider = getProvider(modelId)
   const key = apiKeys[provider]
 
